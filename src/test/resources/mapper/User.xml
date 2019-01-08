@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?><!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.User">
+
+    <update id="dropTable">
+
+
+drop table tes_user;
+
+
+    </update>
+
+    <update id="createTable">
+CREATE TABLE tes_user
+(
+  id           VARCHAR(50)  NOT NULL PRIMARY KEY,
+  login_id      VARCHAR(50)  NULL,
+  name         VARCHAR(20)  NULL,
+  password     VARCHAR(100) NULL,
+  sex          CHAR         NULL
+  COMMENT '1、F=女；2、M=男；',
+  status       INT          NULL,
+  created_time  DATETIME     NULL,
+  modified_time DATETIME     NULL,
+  created_by    VARCHAR(50)  NULL,
+  modified_by   VARCHAR(50)  NULL,
+  org_id        VARCHAR(50)  NULL
+);
+
+    </update>
+
+    <select id="selectById" resultType="com.zhuang.data.model.User">
+        SELECT * from tes_user where Id=#{Id}
+    </select>
+
+    <select id="selectMap" resultType="map">
+        SELECT * from tes_user where Id=#{Id}
+    </select>
+
+    <select id="selectMaps" resultType="map">
+        SELECT * from tes_user
+    </select>
+
+
+    <select id="selectPage" resultType="com.zhuang.data.model.User">
+        SELECT * from tes_user
+    </select>
+
+
+    <select id="selectCount" resultType="int">
+        select count(*) from tes_user
+    </select>
+
+    <insert id="insert" parameterType="com.zhuang.data.model.User">
+        INSERT INTO tes_user(
+  Id,
+  LoginId,
+  Name,
+  Password,
+  Sex,
+  Status,
+  CreatedTime,
+  ModifiedTime,
+  CreatedBy,
+  ModifiedBy,
+  OrgId
+)
+VALUES (#{id},
+  #{loginId},
+  #{name},
+  #{password},
+  #{sex},
+  #{status},
+  #{createdTime},
+  #{modifiedTime},
+  #{createdBy},
+  #{modifiedBy},
+  #{orgId});
+    </insert>
+</mapper>
+

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?> <!DOCTYPE configuration  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<!-- 引入外部配置文件 -->
+	<properties resource="config/jdbc-mysql.properties"></properties>
+
+	<settings>
+		<setting name="logImpl" value="SLF4J" />
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+	</settings>
+
+	<!-- <typeAliases> <package name="com.zhuang.autocmodeldels"/> </typeAliases> -->
+
+	<plugins>
+		<plugin interceptor="com.zhuang.data.mybatis.interceptor.PaginationInterceptor"></plugin>
+		<plugin interceptor="com.zhuang.data.mybatis.interceptor.DbExecutionInterceptor"></plugin>
+	</plugins>
+
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="${jdbc.driver}" />
+				<property name="url" value="${jdbc.url}" />
+				<property name="username" value="${jdbc.username}" />
+				<property name="password" value="${jdbc.password}" />
+			</dataSource>
+		</environment>
+	</environments>
+<!-- 
+	<databaseIdProvider type="DB_VENDOR">
+		<property name="Oracle" value="oracle" />
+		<property name="MySQL" value="mysql" />
+		<property name="SQL Server" value="mssql" />
+		<property name="DB2" value="db2" />
+		<property name="Adaptive Server Enterprise" value="sybase" />
+	</databaseIdProvider>
+ -->
+	<mappers>
+		<mapper resource="mapper/User.xml" />
+	</mappers>
+
+</configuration>
