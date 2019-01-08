@@ -27,9 +27,9 @@
     </developers>
 
     <scm>
-        <url>https://github.com/weibin268/my-data</url>
         <connection>scm:git:ssh://github.com/weibin268/my-data.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/weibin268/my-data.git</developerConnection>
+        <url>https://github.com/weibin268/my-data</url>
     </scm>
 
     <properties>
