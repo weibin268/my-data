@@ -16,13 +16,13 @@ public class DbAccessorFactoryTest {
         jdbc.driver=com.mysql.jdbc.Driver
 jdbc.url=jdbc:mysql://localhost:3306/zwb?useSSL=true&useUnicode=true&characterEncoding=UTF-8
 jdbc.username=root
-jdbc.password=2681645
+jdbc.password=123456
 
         */
 
         JdbcProperties jdbcProperties=new JdbcProperties("com.mysql.jdbc.Driver",
                 "jdbc:mysql://localhost:3306/zwb?useSSL=true&useUnicode=true&characterEncoding=UTF-8",
-                "root","2681645");
+                "root","123456");
 
         DbAccessor dbAccessor = DbAccessorFactory.createMyBatisDbAccessor(jdbcProperties.getProperties(),true);
 
