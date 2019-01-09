@@ -7,7 +7,6 @@ import java.util.Date;
 
 /**
  * @author zhuang
- * @create 6/30/18 10:24 AM
  **/
 public class JdbcTypeUtils {
 

@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 
 /**
  * @author zhuang
- * @create 6/3/18 2:00 PM
  **/
 public abstract class CustomTagHandler {
 

@@ -9,7 +9,6 @@ import org.apache.ibatis.mapping.SqlCommandType;
 
 /**
  * @author zhuang
- * @create 7/1/18 10:37 AM
  **/
 public class SqlBuilderUtils {
 
