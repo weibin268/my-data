@@ -78,7 +78,7 @@ public class MyDataProperties {
         String dbExecutionHandlers = properties.getProperty(DB_EXECUTION_HANDLERS);
         if (dbExecutionHandlers != null && !dbExecutionHandlers.isEmpty()) {
             for (String item : dbExecutionHandlers.split(",")) {
-                result.add(item);
+                result.add(item.trim());
             }
         }
         return result;
