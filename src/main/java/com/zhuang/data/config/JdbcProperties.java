@@ -1,9 +1,5 @@
 package com.zhuang.data.config;
 
-import com.zhuang.data.exception.LoadConfigException;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 public class JdbcProperties {
@@ -24,26 +20,6 @@ public class JdbcProperties {
         setUrl(url);
         setUserName(username);
         setPassword(password);
-    }
-
-    public JdbcProperties(String configFile) {
-        InputStream inputStream = null;
-        try {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream(configFile);
-            properties = new Properties();
-            properties.load(inputStream);
-        } catch (IOException e) {
-            throw new LoadConfigException("加载“fileupload.properties”配置文件出错！");
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     public String getDriver() {

@@ -5,6 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.zhuang.data.config.MyDataProperties;
 import com.zhuang.data.orm.annotation.Ignore;
 import com.zhuang.data.orm.annotation.UnderscoreNaming;
 import com.zhuang.data.orm.util.AnnotationUtils;
@@ -119,8 +120,11 @@ public class TableMapping {
 
     private void initTable() {
         //init isUnderscoreNaming
+        isUnderscoreNaming = MyDataProperties.getInstance().getUnderscoreNaming();
         UnderscoreNaming underscoreNamingAnnotation = ReflectionUtils.getAnnotation(entityType, UnderscoreNaming.class);
-        isUnderscoreNaming = underscoreNamingAnnotation != null;
+        if (underscoreNamingAnnotation != null) {
+            isUnderscoreNaming = underscoreNamingAnnotation.value();
+        }
         //init tableName
         tableName = AnnotationUtils.getTableName(entityType);
         if (tableName == null) {

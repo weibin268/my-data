@@ -1,18 +1,17 @@
 package com.zhuang.data.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import com.zhuang.data.exception.LoadConfigException;
-import com.zhuang.data.handler.DbExecuteHandlerFactory;
-import com.zhuang.data.handler.DbExecutionHandler;
-
 public class MyDataProperties {
+
+    private static Logger logger = LoggerFactory.getLogger(MyDataProperties.class);
 
     private Properties properties;
     public final static String DEFAULT_CONFIG_FILE_PATH = "config/my-data.properties";
@@ -23,20 +22,33 @@ public class MyDataProperties {
     private final static String REDIS_HOST = "my.data.redis-host";
     private final static String REDIS_PORT = "my.data.redis-port";
     private final static String DB_EXECUTION_HANDLERS = "my.data.db-execution-handlers";
+    private final static String UNDERSCORE_NAMING = "my.data.underscore-naming";
 
+    private volatile static MyDataProperties myDataProperties;
+
+    public static MyDataProperties getInstance() {
+        if (myDataProperties == null) {
+            synchronized (MyDataProperties.class) {
+                if (myDataProperties == null) {
+                    myDataProperties = new MyDataProperties();
+                }
+            }
+        }
+        return myDataProperties;
+    }
 
     public MyDataProperties() {
         this(DEFAULT_CONFIG_FILE_PATH);
     }
 
     public MyDataProperties(String configFilePath) {
+        properties = new Properties();
         InputStream inputStream = null;
         try {
             inputStream = this.getClass().getClassLoader().getResourceAsStream(configFilePath);
-            properties = new Properties();
             properties.load(inputStream);
         } catch (IOException e) {
-            throw new LoadConfigException("加载“fileupload.properties”配置文件出错！");
+            logger.error("加载“my-data.properties”配置文件出错！", e);
         } finally {
             if (inputStream != null) {
                 try {
@@ -82,6 +94,15 @@ public class MyDataProperties {
             }
         }
         return result;
+    }
+
+    public Boolean getUnderscoreNaming() {
+        String underscoreNaming = properties.getProperty(UNDERSCORE_NAMING);
+        if (underscoreNaming != null && underscoreNaming.equalsIgnoreCase("true")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

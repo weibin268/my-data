@@ -27,12 +27,7 @@ public class DbExecuteHandlerFactory {
     }
 
     private static void loadFromConfig() {
-        MyDataProperties myDataProperties = null;
-        try {
-            myDataProperties = new MyDataProperties();
-        } catch (Exception e) {
-        }
-        if (myDataProperties == null) return;
+        MyDataProperties myDataProperties = MyDataProperties.getInstance();
         List<String> dbExecutionHandlers = myDataProperties.getDbExecutionHandlers();
         for (String item : dbExecutionHandlers) {
             try {
