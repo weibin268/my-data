@@ -15,14 +15,14 @@ import com.zhuang.data.util.DbDialectUtils;
 
 public class JdbcDbAccessor extends DbAccessor {
 
-	private MyDataProperties zhuangDataProperties;
+	private MyDataProperties myDataProperties;
 	private DbDialect dbDialect;
 	private boolean autoCommit;
 
 	public JdbcDbAccessor(String configFile) {
-		zhuangDataProperties = new MyDataProperties(configFile);
+		myDataProperties = new MyDataProperties(configFile);
 		try {
-			Class.forName(zhuangDataProperties.getJdbcDriver());
+			Class.forName(myDataProperties.getJdbcDriver());
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -37,8 +37,8 @@ public class JdbcDbAccessor extends DbAccessor {
 
 	public Connection getConnection() {
 		try {
-			return DriverManager.getConnection(zhuangDataProperties.getJdbcUrl(),
-					zhuangDataProperties.getJdbcUserName(), zhuangDataProperties.getJdbcPassword());
+			return DriverManager.getConnection(myDataProperties.getJdbcUrl(),
+					myDataProperties.getJdbcUserName(), myDataProperties.getJdbcPassword());
 		} catch (SQLException e) {
 			throw new GetConnectionException("JdbcDbAccessor获取Connection失败！", e);
 		}
