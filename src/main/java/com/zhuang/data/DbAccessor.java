@@ -20,13 +20,13 @@ import com.zhuang.data.orm.sql.SqlBuilderFactory;
 
 public abstract class DbAccessor {
 
-    /*for attributes begin*/
+    //region attributes
     protected DbDialect dbDialect;
     protected String configFile;
     protected boolean autoCommit;
-    /*for attributes end*/
+    //endregion
 
-    /*for get attributes begin*/
+    //region get attributes
     abstract public DbDialect getDbDialect();
 
     abstract public Connection getConnection();
@@ -34,9 +34,9 @@ public abstract class DbAccessor {
     abstract public String getConfigFile();
 
     abstract public boolean getAutoCommit();
-    /*for get attributes end*/
+    //endregion
 
-    /*for common action begin*/
+    //region common action
     abstract public <T> T queryEntity(String sql, Object parameter, Class<T> entityType);
 
     abstract public <T> List<T> queryEntities(String sql, Object parameter, Class<T> entityType);
@@ -44,17 +44,17 @@ public abstract class DbAccessor {
     abstract public <T> List<T> pageQueryEntities(String sql, PageInfo pageInfo, Object parameter, Class<T> entityType);
 
     abstract public int executeNonQuery(String sql, Object parameter);
-    /*for common action end*/
+    //endregion
 
-    /*for transaction begin*/
+    //region transaction
     abstract public void commit();
 
     abstract public void rollback();
 
     abstract public void close();
-    /*for transaction end*/
+    //endregion
 
-    /*for entity begin*/
+    //region entity
     abstract public <T> T select(Object objKey, Class<T> entityType);
 
     abstract public int insert(Object entity);
@@ -64,13 +64,13 @@ public abstract class DbAccessor {
     abstract public int update(Object entity, String[] propertyNames);
 
     abstract public <T> int delete(Object objKey, Class<T> entityType);
-    /*for entity end*/
 
     abstract public int insertOrUpdate(Object entity);
 
     abstract public <T> List<T> selectByMap(Map<String, Object> propertyMap, Class<T> entityType);
+    //endregion
 
-    /*for public static begin*/
+    //region public static
     public static DbAccessor get() {
         return DbAccessorFactory.getMyBatisDbAccessor();
     }
@@ -78,5 +78,5 @@ public abstract class DbAccessor {
     public static DbAccessor create() {
         return DbAccessorFactory.createMyBatisDbAccessor();
     }
-    /*for public static end*/
+    //endregion
 }
