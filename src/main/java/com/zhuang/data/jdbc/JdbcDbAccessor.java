@@ -1,16 +1,22 @@
 package com.zhuang.data.jdbc;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
 import com.zhuang.data.DbAccessor;
 import com.zhuang.data.config.MyDataProperties;
 import com.zhuang.data.enums.DbDialect;
+import com.zhuang.data.exception.ExecuteSqlException;
 import com.zhuang.data.exception.GetConnectionException;
+import com.zhuang.data.jdbc.util.PreparedStatementUtils;
+import com.zhuang.data.jdbc.util.ResultSetUtils;
 import com.zhuang.data.model.PageInfo;
+import com.zhuang.data.orm.enums.PlaceHolderType;
+import com.zhuang.data.orm.mapping.TableMapping;
+import com.zhuang.data.orm.sql.BuildResult;
+import com.zhuang.data.orm.sql.SqlBuilder;
+import com.zhuang.data.orm.sql.SqlBuilderFactory;
 import com.zhuang.data.util.DbDialectUtils;
 
 public class JdbcDbAccessor extends DbAccessor {
@@ -79,7 +85,6 @@ public class JdbcDbAccessor extends DbAccessor {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
 	
 	@Override
 	public void commit() {
@@ -100,10 +105,103 @@ public class JdbcDbAccessor extends DbAccessor {
 	}
 
 	@Override
+	public <T> T select(Object objKey, Class<T> entityType) {
+		SqlBuilder sqlBuilder = SqlBuilderFactory.createSqlBuilder(dbDialect, new TableMapping(entityType), PlaceHolderType.QuestionMark);
+		BuildResult buildResult = sqlBuilder.buildSelect();
+		Connection connection = getConnection();
+		try {
+			PreparedStatement preparedStatement = connection.prepareStatement(buildResult.getSql());
+			PreparedStatementUtils.setParameter(preparedStatement, objKey, buildResult.getParametersIndex());
+			ResultSet resultSet = preparedStatement.executeQuery();
+			List<T> entityList = ResultSetUtils.readToEntities(resultSet, entityType);
+			if (entityList.size() > 0)
+				return entityList.get(0);
+			else
+				return null;
+		} catch (SQLException e) {
+			throw new ExecuteSqlException(e.getMessage(), e);
+		} finally {
+			try {
+				if (getAutoCommit())
+					connection.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public int insert(Object entity) {
+		SqlBuilder sqlBuilder = SqlBuilderFactory.createSqlBuilder(dbDialect, new TableMapping(entity.getClass()), PlaceHolderType.QuestionMark);
+		BuildResult buildResult = sqlBuilder.buildInsert();
+		Connection connection = getConnection();
+		try {
+			PreparedStatement preparedStatement = connection.prepareStatement(buildResult.getSql());
+			PreparedStatementUtils.setParameter(preparedStatement, entity, buildResult.getParametersIndex());
+			return preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			throw new ExecuteSqlException(e.getMessage(), e);
+		} finally {
+			try {
+				if (getAutoCommit())
+					connection.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public int update(Object entity) {
+		SqlBuilder sqlBuilder = SqlBuilderFactory.createSqlBuilder(dbDialect, new TableMapping(entity.getClass()), PlaceHolderType.QuestionMark);
+		BuildResult buildResult = sqlBuilder.buildUpdate();
+		Connection connection = getConnection();
+		try {
+			PreparedStatement preparedStatement = connection.prepareStatement(buildResult.getSql());
+			PreparedStatementUtils.setParameter(preparedStatement, entity, buildResult.getParametersIndex());
+			return preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			throw new ExecuteSqlException(e.getMessage(), e);
+		} finally {
+			try {
+				if (getAutoCommit())
+					connection.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public <T> int delete(Object objKey, Class<T> entityType) {
+		SqlBuilder sqlBuilder = SqlBuilderFactory.createSqlBuilder(dbDialect, new TableMapping(entityType), PlaceHolderType.QuestionMark);
+		BuildResult buildResult = sqlBuilder.buildDelete();
+		Connection connection = getConnection();
+		try {
+			PreparedStatement preparedStatement = connection.prepareStatement(buildResult.getSql());
+			PreparedStatementUtils.setParameter(preparedStatement, objKey, buildResult.getParametersIndex());
+			return preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			throw new ExecuteSqlException(e.getMessage(), e);
+		} finally {
+			try {
+				if (getAutoCommit())
+					connection.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	@Override
 	public int update(Object entity, String[] propertyNames) {
 		return 0;
 	}
-
 
 	@Override
 	public int insertOrUpdate(Object entity) {

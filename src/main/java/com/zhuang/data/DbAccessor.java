@@ -55,102 +55,20 @@ public abstract class DbAccessor {
     /*for transaction end*/
 
     /*for entity begin*/
-    public <T> T select(Object objKey, Class<T> entityType) {
-        SqlBuilder sqlBuilder = SqlBuilderFactory.createSqlBuilder(dbDialect, new TableMapping(entityType), PlaceHolderType.QuestionMark);
-        BuildResult buildResult = sqlBuilder.buildSelect();
-        Connection connection = getConnection();
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(buildResult.getSql());
-            PreparedStatementUtils.setParameter(preparedStatement, objKey, buildResult.getParametersIndex());
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<T> entityList = ResultSetUtils.readToEntities(resultSet, entityType);
-            if (entityList.size() > 0)
-                return entityList.get(0);
-            else
-                return null;
-        } catch (SQLException e) {
-            throw new ExecuteSqlException(e.getMessage(), e);
-        } finally {
-            try {
-                if (getAutoCommit())
-                    connection.close();
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    }
+    abstract public <T> T select(Object objKey, Class<T> entityType);
 
-    public int insert(Object entity) {
-        SqlBuilder sqlBuilder = SqlBuilderFactory.createSqlBuilder(dbDialect, new TableMapping(entity.getClass()), PlaceHolderType.QuestionMark);
-        BuildResult buildResult = sqlBuilder.buildInsert();
-        Connection connection = getConnection();
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(buildResult.getSql());
-            PreparedStatementUtils.setParameter(preparedStatement, entity, buildResult.getParametersIndex());
-            return preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new ExecuteSqlException(e.getMessage(), e);
-        } finally {
-            try {
-                if (getAutoCommit())
-                    connection.close();
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    }
+    abstract public int insert(Object entity);
 
-    public int update(Object entity) {
-        SqlBuilder sqlBuilder = SqlBuilderFactory.createSqlBuilder(dbDialect, new TableMapping(entity.getClass()), PlaceHolderType.QuestionMark);
-        BuildResult buildResult = sqlBuilder.buildUpdate();
-        Connection connection = getConnection();
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(buildResult.getSql());
-            PreparedStatementUtils.setParameter(preparedStatement, entity, buildResult.getParametersIndex());
-            return preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new ExecuteSqlException(e.getMessage(), e);
-        } finally {
-            try {
-                if (getAutoCommit())
-                    connection.close();
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    }
+    abstract public int update(Object entity);
 
     abstract public int update(Object entity, String[] propertyNames);
 
-    public <T> int delete(Object objKey, Class<T> entityType) {
-        SqlBuilder sqlBuilder = SqlBuilderFactory.createSqlBuilder(dbDialect, new TableMapping(entityType), PlaceHolderType.QuestionMark);
-        BuildResult buildResult = sqlBuilder.buildDelete();
-        Connection connection = getConnection();
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(buildResult.getSql());
-            PreparedStatementUtils.setParameter(preparedStatement, objKey, buildResult.getParametersIndex());
-            return preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new ExecuteSqlException(e.getMessage(), e);
-        } finally {
-            try {
-                if (getAutoCommit())
-                    connection.close();
-            } catch (SQLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-    }
+    abstract public <T> int delete(Object objKey, Class<T> entityType);
     /*for entity end*/
 
-    public abstract int insertOrUpdate(Object entity);
+    abstract public int insertOrUpdate(Object entity);
 
-    public abstract <T> List<T> selectByMap(Map<String, Object> propertyMap, Class<T> entityType);
+    abstract public <T> List<T> selectByMap(Map<String, Object> propertyMap, Class<T> entityType);
 
     /*for public static begin*/
     public static DbAccessor get() {
