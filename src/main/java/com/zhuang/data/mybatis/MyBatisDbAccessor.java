@@ -1,27 +1,25 @@
 package com.zhuang.data.mybatis;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.zhuang.data.mybatis.util.MappedStatementUtils;
-import org.apache.ibatis.mapping.MappedStatement;
-import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-
 import com.zhuang.data.DbAccessor;
 import com.zhuang.data.enums.DbDialect;
 import com.zhuang.data.exception.ExecuteSqlException;
 import com.zhuang.data.exception.GetConnectionException;
 import com.zhuang.data.model.PageInfo;
 import com.zhuang.data.mybatis.model.PageQueryParameter;
+import com.zhuang.data.mybatis.util.MappedStatementUtils;
 import com.zhuang.data.mybatis.util.SqlSessionFactoryUtils;
 import com.zhuang.data.util.DbDialectUtils;
 import com.zhuang.data.util.EntityUtils;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MyBatisDbAccessor extends DbAccessor {
 
@@ -79,12 +77,12 @@ public class MyBatisDbAccessor extends DbAccessor {
         if (autoCommit) {
             SqlSession sqlSession = sqlSessionFactory.openSession();
             try {
-                result = queryEntity(sql, parameter, entityType, sqlSession);
+                result = queryEntity(sql, parameter, sqlSession);
             } finally {
                 sqlSession.close();
             }
         } else {
-            result = queryEntity(sql, parameter, entityType, globalSqlSession);
+            result = queryEntity(sql, parameter, globalSqlSession);
         }
         return result;
     }
@@ -95,12 +93,12 @@ public class MyBatisDbAccessor extends DbAccessor {
         if (autoCommit) {
             SqlSession sqlSession = sqlSessionFactory.openSession();
             try {
-                result = queryEntities(sql, parameter, entityType, sqlSession);
+                result = queryEntities(sql, parameter, sqlSession);
             } finally {
                 sqlSession.close();
             }
         } else {
-            result = queryEntities(sql, parameter, entityType, globalSqlSession);
+            result = queryEntities(sql, parameter, globalSqlSession);
         }
         return result;
     }
@@ -131,13 +129,13 @@ public class MyBatisDbAccessor extends DbAccessor {
         if (autoCommit) {
             SqlSession sqlSession = sqlSessionFactory.openSession();
             try {
-                result = pageQueryEntities(sql, pageInfo, parameter, entityType, sqlSession);
+                result = pageQueryEntities(sql, pageInfo, parameter, sqlSession);
             } finally {
                 sqlSession.close();
             }
 
         } else {
-            result = pageQueryEntities(sql, pageInfo, parameter, entityType, globalSqlSession);
+            result = pageQueryEntities(sql, pageInfo, parameter, globalSqlSession);
         }
         return result;
     }
@@ -216,18 +214,17 @@ public class MyBatisDbAccessor extends DbAccessor {
         return queryEntities(mappedStatementId, propertyMap, entityType);
     }
 
-    private <T> T queryEntity(String sql, Object parameter, Class<T> entityType, SqlSession sqlSession) {
+    private <T> T queryEntity(String sql, Object parameter, SqlSession sqlSession) {
         T result;
         result = sqlSession.selectOne(sql, parameter);
         return result;
     }
 
-    private <T> List<T> pageQueryEntities(String sql, PageInfo pageInfo, Object parameter, Class<T> entityType,
-                                          SqlSession sqlSession) {
+    private <T> List<T> pageQueryEntities(String sql, PageInfo pageInfo, Object parameter, SqlSession sqlSession) {
         List<T> result;
         Map<String, Object> mapParameter = EntityUtils.convertToMap(parameter);
         if (mapParameter == null) {
-            mapParameter = new HashMap<String, Object>();
+            mapParameter = new HashMap<>();
         }
         PageQueryParameter pageQueryParameter = new PageQueryParameter();
         pageQueryParameter.setTarget(this);
@@ -257,7 +254,7 @@ public class MyBatisDbAccessor extends DbAccessor {
         return result;
     }
 
-    private <T> List<T> queryEntities(String sql, Object parameter, Class<T> entityType, SqlSession sqlSession) {
+    private <T> List<T> queryEntities(String sql, Object parameter,SqlSession sqlSession) {
         List<T> result;
         result = sqlSession.selectList(sql, parameter);
         return result;
