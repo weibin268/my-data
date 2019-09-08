@@ -15,14 +15,14 @@ public class MyDataProperties {
 
     private Properties properties;
     public final static String DEFAULT_CONFIG_FILE_PATH = "config/my-data.properties";
-    private final static String JDBC_DRIVER = "my.data.jdbc-driver";
-    private final static String JDBC_URL = "my.data.jdbc-url";
-    private final static String JDBC_USERNAME = "my.data.jdbc-username";
-    private final static String JDBC_PASSWORD = "my.data.jdbc-password";
-    private final static String REDIS_HOST = "my.data.redis-host";
-    private final static String REDIS_PORT = "my.data.redis-port";
-    private final static String DB_EXECUTION_HANDLERS = "my.data.db-execution-handlers";
-    private final static String UNDERSCORE_NAMING = "my.data.underscore-naming";
+    public final static String JDBC_DRIVER = "my.data.jdbc-driver";
+    public final static String JDBC_URL = "my.data.jdbc-url";
+    public final static String JDBC_USERNAME = "my.data.jdbc-username";
+    public final static String JDBC_PASSWORD = "my.data.jdbc-password";
+    public final static String REDIS_HOST = "my.data.redis-host";
+    public final static String REDIS_PORT = "my.data.redis-port";
+    public final static String DB_EXECUTION_HANDLERS = "my.data.db-execution-handlers";
+    public final static String UNDERSCORE_NAMING = "my.data.underscore-naming";
 
     private volatile static MyDataProperties myDataProperties;
 
@@ -48,7 +48,7 @@ public class MyDataProperties {
             inputStream = this.getClass().getClassLoader().getResourceAsStream(configFilePath);
             properties.load(inputStream);
         } catch (IOException e) {
-            logger.error("加载“my-data.properties”配置文件出错！", e);
+            logger.debug("未加载到“my-data.properties”配置文件！", e);
         } finally {
             if (inputStream != null) {
                 try {
@@ -59,6 +59,10 @@ public class MyDataProperties {
                 }
             }
         }
+    }
+
+    public Properties getProperties() {
+        return properties;
     }
 
     public String getJdbcDriver() {
@@ -98,10 +102,10 @@ public class MyDataProperties {
 
     public Boolean getUnderscoreNaming() {
         String underscoreNaming = properties.getProperty(UNDERSCORE_NAMING);
-        if (underscoreNaming != null && underscoreNaming.equalsIgnoreCase("true")) {
-            return true;
-        } else {
+        if (underscoreNaming != null && underscoreNaming.equalsIgnoreCase("false")) {
             return false;
+        } else {
+            return true;
         }
     }
 
