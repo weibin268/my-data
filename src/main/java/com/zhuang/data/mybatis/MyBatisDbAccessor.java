@@ -8,6 +8,7 @@ import com.zhuang.data.model.PageInfo;
 import com.zhuang.data.mybatis.model.PageQueryParameter;
 import com.zhuang.data.mybatis.util.MappedStatementUtils;
 import com.zhuang.data.mybatis.util.SqlSessionFactoryUtils;
+import com.zhuang.data.util.BeanUtils;
 import com.zhuang.data.util.DbDialectUtils;
 import com.zhuang.data.util.EntityUtils;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -204,14 +205,12 @@ public class MyBatisDbAccessor extends DbAccessor {
     }
 
     @Override
-    public <T> List<T> selectByMap(Map<String, Object> propertyMap, Class<T> entityType) {
-        if (propertyMap == null || propertyMap.size() == 0) {
-            throw new RuntimeException("MyBatisDbAccessor.selectByMap 参数 propertyMap 不能为空！");
-        }
-        String[] propertyNames = new String[propertyMap.keySet().size()];
-        propertyNames = propertyMap.keySet().toArray(propertyNames);
-        String mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entityType, propertyMap.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.SELECT, propertyNames);
-        return queryEntities(mappedStatementId, propertyMap, entityType);
+    public <T> List<T> selectByObject(Object objParams, Class<T> entityType) {
+        Map<String, Object> mapParams = BeanUtils.objectToMap(objParams);
+        String[] propertyNames = new String[mapParams.keySet().size()];
+        propertyNames = mapParams.keySet().toArray(propertyNames);
+        String mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entityType, mapParams.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.SELECT, propertyNames);
+        return queryEntities(mappedStatementId, mapParams, entityType);
     }
 
     private <T> T queryEntity(String sql, Object parameter, SqlSession sqlSession) {
@@ -254,7 +253,7 @@ public class MyBatisDbAccessor extends DbAccessor {
         return result;
     }
 
-    private <T> List<T> queryEntities(String sql, Object parameter,SqlSession sqlSession) {
+    private <T> List<T> queryEntities(String sql, Object parameter, SqlSession sqlSession) {
         List<T> result;
         result = sqlSession.selectList(sql, parameter);
         return result;

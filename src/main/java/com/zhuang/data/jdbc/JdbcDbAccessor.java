@@ -209,7 +209,7 @@ public class JdbcDbAccessor extends DbAccessor {
 	}
 
 	@Override
-	public <T> List<T> selectByMap(Map<String, Object> propertyMap, Class<T> entityType) {
+	public <T> List<T> selectByObject(Object objParams, Class<T> entityType) {
 		return null;
 	}
 }

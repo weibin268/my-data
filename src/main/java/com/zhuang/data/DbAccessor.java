@@ -67,7 +67,7 @@ public abstract class DbAccessor {
 
     abstract public int insertOrUpdate(Object entity);
 
-    abstract public <T> List<T> selectByMap(Map<String, Object> propertyMap, Class<T> entityType);
+    abstract public <T> List<T> selectByObject(Object objParams, Class<T> entityType);
     //endregion
 
     //region public static

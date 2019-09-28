@@ -137,11 +137,12 @@ public class MyBatisDbAccessorTest {
     }
 
     @Test
-    public void selectByMap() {
+    public void selectByObject() {
         DbAccessor dbAccessor = DbAccessor.get();
-        Map<String, Object> parameter = new HashMap<>();
-        parameter.put("name", "张三");
-        dbAccessor.selectByMap(parameter, User.class).stream().forEach(System.out::println);
+        User user = new User();
+        user.setId("0a3ca54c-064c-46c7-aff2-722378008452");
+        user.setName("张三81");
+        dbAccessor.selectByObject(user, User.class).stream().forEach(System.out::println);
     }
 
     @Test
