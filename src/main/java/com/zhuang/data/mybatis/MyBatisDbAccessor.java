@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MyBatisDbAccessor extends DbAccessor {
 
@@ -176,16 +177,19 @@ public class MyBatisDbAccessor extends DbAccessor {
 
     @Override
     public int update(Object entity) {
-        String mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entity.getClass(), entity.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.UPDATE);
-        return executeNonQuery(mappedStatementId, entity);
+        return update(entity, false);
     }
 
     @Override
-    public int update(Object entity, String[] propertyNames) {
-        if (propertyNames == null || propertyNames.length == 0) {
-            throw new RuntimeException("MyBatisDbAccessor.update 参数 propertyNames 不能为空！");
+    public int update(Object entity, boolean excludeNullFields) {
+        String mappedStatementId;
+        if (excludeNullFields) {
+            Map<String, Object> map = BeanUtils.objectToMap(entity);
+            String[] propertyNames = map.keySet().toArray(new String[]{});
+            mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entity.getClass(), entity.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.UPDATE, propertyNames);
+        } else {
+            mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entity.getClass(), entity.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.UPDATE);
         }
-        String mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entity.getClass(), entity.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.UPDATE, propertyNames);
         return executeNonQuery(mappedStatementId, entity);
     }
 
@@ -205,7 +209,7 @@ public class MyBatisDbAccessor extends DbAccessor {
     }
 
     @Override
-    public <T> List<T> selectByObject(Object objParams, Class<T> entityType) {
+    public <T> List<T> selectByParams(Object objParams, Class<T> entityType) {
         Map<String, Object> mapParams = BeanUtils.objectToMap(objParams);
         String[] propertyNames = new String[mapParams.keySet().size()];
         propertyNames = mapParams.keySet().toArray(propertyNames);

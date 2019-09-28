@@ -61,13 +61,13 @@ public abstract class DbAccessor {
 
     abstract public int update(Object entity);
 
-    abstract public int update(Object entity, String[] propertyNames);
+    abstract public int update(Object entity, boolean excludeNullFields);
 
     abstract public <T> int delete(Object objKey, Class<T> entityType);
 
     abstract public int insertOrUpdate(Object entity);
 
-    abstract public <T> List<T> selectByObject(Object objParams, Class<T> entityType);
+    abstract public <T> List<T> selectByParams(Object objParams, Class<T> entityType);
     //endregion
 
     //region public static

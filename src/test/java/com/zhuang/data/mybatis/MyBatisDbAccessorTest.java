@@ -41,13 +41,9 @@ public class MyBatisDbAccessorTest {
 
     @Test
     public void update() {
-
         DbAccessor dbAccessor = DbAccessor.get();
-
         String id = UUID.randomUUID().toString();
-
         System.out.println("id:" + id);
-
         User user1 = new User();
         user1.setId(id);
         user1.setName("张三");
@@ -92,12 +88,10 @@ public class MyBatisDbAccessorTest {
         dbAccessor.insert(user1);
         User user2 = dbAccessor.select(id, User.class);
         System.out.println("before update:" + user2);
-        Map<String, Object> param = new HashMap<>();
-        param.put("id", user2.getId());
-        param.put("name", "zwb");
-        param.put("orgId", "001");
-        int updateResult = dbAccessor.update(user2, new String[]{"id", "name", "orgId"});
-        System.out.println("update result:" + updateResult);
+        User params=new User();
+        params.setId(id);
+        params.setName("1234123412341234");
+        int updateResult = dbAccessor.update(params, true);
         User user3 = dbAccessor.select(id, User.class);
         System.out.println("after update:" + user3);
     }
@@ -137,12 +131,12 @@ public class MyBatisDbAccessorTest {
     }
 
     @Test
-    public void selectByObject() {
+    public void selectByParams() {
         DbAccessor dbAccessor = DbAccessor.get();
         User user = new User();
         user.setId("0a3ca54c-064c-46c7-aff2-722378008452");
         user.setName("张三81");
-        dbAccessor.selectByObject(user, User.class).stream().forEach(System.out::println);
+        dbAccessor.selectByParams(user, User.class).stream().forEach(System.out::println);
     }
 
     @Test

@@ -199,7 +199,7 @@ public class JdbcDbAccessor extends DbAccessor {
 	}
 
 	@Override
-	public int update(Object entity, String[] propertyNames) {
+	public int update(Object entity, boolean excludeNullFields) {
 		return 0;
 	}
 
@@ -209,7 +209,7 @@ public class JdbcDbAccessor extends DbAccessor {
 	}
 
 	@Override
-	public <T> List<T> selectByObject(Object objParams, Class<T> entityType) {
+	public <T> List<T> selectByParams(Object objParams, Class<T> entityType) {
 		return null;
 	}
 }
