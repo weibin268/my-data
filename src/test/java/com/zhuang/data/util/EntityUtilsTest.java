@@ -13,7 +13,7 @@ public class EntityUtilsTest {
     public void convertToMap() {
         User user=new User();
         user.setName("zwb");
-        Map map = EntityUtils.entityToMap(user);
+        Map map = EntityUtils.entityToMap(user,true);
         System.out.println(map);
     }
 }

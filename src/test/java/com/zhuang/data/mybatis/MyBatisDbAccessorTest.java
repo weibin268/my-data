@@ -131,12 +131,12 @@ public class MyBatisDbAccessorTest {
     }
 
     @Test
-    public void selectByParams() {
+    public void selectList() {
         DbAccessor dbAccessor = DbAccessor.get();
         User user = new User();
         user.setId("0a3ca54c-064c-46c7-aff2-722378008452");
         user.setName("张三81");
-        dbAccessor.selectByParams(user, User.class).stream().forEach(System.out::println);
+        dbAccessor.selectList(user, User.class).stream().forEach(System.out::println);
     }
 
     @Test

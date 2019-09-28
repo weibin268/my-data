@@ -67,7 +67,7 @@ public abstract class DbAccessor {
 
     abstract public int insertOrUpdate(Object entity);
 
-    abstract public <T> List<T> selectByParams(Object objParams, Class<T> entityType);
+    abstract public <T> List<T> selectList(Object objParams, Class<T> entityType);
     //endregion
 
     //region public static

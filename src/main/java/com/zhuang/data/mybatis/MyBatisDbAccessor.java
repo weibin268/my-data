@@ -182,7 +182,7 @@ public class MyBatisDbAccessor extends DbAccessor {
     public int update(Object entity, boolean excludeNullFields) {
         String mappedStatementId;
         if (excludeNullFields) {
-            Map<String, Object> map = EntityUtils.entityToMap(entity);
+            Map<String, Object> map = EntityUtils.entityToMap(entity, true);
             String[] propertyNames = map.keySet().toArray(new String[]{});
             mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entity.getClass(), entity.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.UPDATE, propertyNames);
         } else {
@@ -207,8 +207,8 @@ public class MyBatisDbAccessor extends DbAccessor {
     }
 
     @Override
-    public <T> List<T> selectByParams(Object objParams, Class<T> entityType) {
-        Map<String, Object> mapParams = EntityUtils.entityToMap(objParams);
+    public <T> List<T> selectList(Object objParams, Class<T> entityType) {
+        Map<String, Object> mapParams = EntityUtils.entityToMap(objParams, true);
         String[] propertyNames = new String[mapParams.keySet().size()];
         propertyNames = mapParams.keySet().toArray(propertyNames);
         String mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entityType, mapParams.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.SELECT, propertyNames);
