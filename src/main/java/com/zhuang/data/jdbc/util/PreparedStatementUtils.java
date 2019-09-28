@@ -10,11 +10,10 @@ import com.zhuang.data.util.EntityUtils;
 public class PreparedStatementUtils {
 
     public static void setParameter(PreparedStatement preparedStatement, Object parameter, Map<String, Integer> parametersIndex) throws SQLException {
-
         if (DataTypeUtils.isPrimitiveType(parameter)) {
             preparedStatement.setObject(1, parameter);
         } else {
-            Map<String, Object> mapParameter = EntityUtils.convertToMap(parameter);
+            Map<String, Object> mapParameter = EntityUtils.entityToMap(parameter);
             for (String key : parametersIndex.keySet()) {
                 if (mapParameter.containsKey(key)) {
                     Integer parameterIndex = parametersIndex.get(key);
@@ -24,5 +23,4 @@ public class PreparedStatementUtils {
             }
         }
     }
-
 }

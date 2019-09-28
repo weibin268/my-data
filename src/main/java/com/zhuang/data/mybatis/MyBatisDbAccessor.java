@@ -8,7 +8,6 @@ import com.zhuang.data.model.PageInfo;
 import com.zhuang.data.mybatis.model.PageQueryParameter;
 import com.zhuang.data.mybatis.util.MappedStatementUtils;
 import com.zhuang.data.mybatis.util.SqlSessionFactoryUtils;
-import com.zhuang.data.util.BeanUtils;
 import com.zhuang.data.util.DbDialectUtils;
 import com.zhuang.data.util.EntityUtils;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -21,7 +20,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MyBatisDbAccessor extends DbAccessor {
 
@@ -184,7 +182,7 @@ public class MyBatisDbAccessor extends DbAccessor {
     public int update(Object entity, boolean excludeNullFields) {
         String mappedStatementId;
         if (excludeNullFields) {
-            Map<String, Object> map = BeanUtils.objectToMap(entity);
+            Map<String, Object> map = EntityUtils.entityToMap(entity);
             String[] propertyNames = map.keySet().toArray(new String[]{});
             mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entity.getClass(), entity.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.UPDATE, propertyNames);
         } else {
@@ -210,7 +208,7 @@ public class MyBatisDbAccessor extends DbAccessor {
 
     @Override
     public <T> List<T> selectByParams(Object objParams, Class<T> entityType) {
-        Map<String, Object> mapParams = BeanUtils.objectToMap(objParams);
+        Map<String, Object> mapParams = EntityUtils.entityToMap(objParams);
         String[] propertyNames = new String[mapParams.keySet().size()];
         propertyNames = mapParams.keySet().toArray(propertyNames);
         String mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entityType, mapParams.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.SELECT, propertyNames);
@@ -225,7 +223,7 @@ public class MyBatisDbAccessor extends DbAccessor {
 
     private <T> List<T> pageQueryEntities(String sql, PageInfo pageInfo, Object parameter, SqlSession sqlSession) {
         List<T> result;
-        Map<String, Object> mapParameter = EntityUtils.convertToMap(parameter);
+        Map<String, Object> mapParameter = EntityUtils.entityToMap(parameter);
         if (mapParameter == null) {
             mapParameter = new HashMap<>();
         }
