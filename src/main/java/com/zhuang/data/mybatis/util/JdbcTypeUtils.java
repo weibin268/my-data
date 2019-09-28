@@ -10,7 +10,7 @@ import java.util.Date;
  **/
 public class JdbcTypeUtils {
 
-    public static String getJdbcTypeName(DbDialect dbDialect, Class propertyType) {
+    public static String getJdbcTypeName(Class propertyType) {
 
         if (propertyType == String.class) {
             return JdbcType.VARCHAR.name();

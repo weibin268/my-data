@@ -13,11 +13,11 @@ public class OracleSqlBuilder extends BaseSqlBuilder {
 
     @Override
     protected String getPlaceHolder(PlaceHolderType placeHolderType, String columnName) {
-        String jdbcType = JdbcTypeUtils.getJdbcTypeName(DbDialect.Oracle, tableMapping.getColumnByColumnName(columnName).getPropertyType());
+        String jdbcType = JdbcTypeUtils.getJdbcTypeName(tableMapping.getColumnByColumnName(columnName).getPropertyType());
         if (jdbcType != null) {
             columnName = columnName + ",jdbcType=" + jdbcType;
         }
-        String result=super.getPlaceHolder(placeHolderType,columnName);
+        String result = super.getPlaceHolder(placeHolderType, columnName);
         return result;
     }
 }
