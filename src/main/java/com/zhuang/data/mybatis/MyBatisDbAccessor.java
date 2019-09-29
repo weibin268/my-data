@@ -215,6 +215,12 @@ public class MyBatisDbAccessor extends DbAccessor {
         return queryEntities(mappedStatementId, mapParams, entityType);
     }
 
+    @Override
+    public <T> T selectOne(Object objParams, Class<T> entityType) {
+        List<T> list = selectList(objParams, entityType);
+        return list.size() > 0 ? list.get(0) : null;
+    }
+
     private <T> T queryEntity(String sql, Object parameter, SqlSession sqlSession) {
         T result;
         result = sqlSession.selectOne(sql, parameter);

@@ -212,4 +212,9 @@ public class JdbcDbAccessor extends DbAccessor {
 	public <T> List<T> selectList(Object objParams, Class<T> entityType) {
 		return null;
 	}
+
+	@Override
+	public <T> T selectOne(Object objParams, Class<T> entityType) {
+		return null;
+	}
 }

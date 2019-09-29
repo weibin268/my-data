@@ -142,6 +142,15 @@ public class MyBatisDbAccessorTest {
     }
 
     @Test
+    public void selectOne() {
+        DbAccessor dbAccessor = DbAccessor.get();
+        User user = new User();
+        user.setName("张三81");
+        User result = dbAccessor.selectOne(user, User.class);
+        System.out.println(result);
+    }
+
+    @Test
     public void queryEntity() {
         DbAccessor dbAccessor = DbAccessor.get();
         String id = UUID.randomUUID().toString();
