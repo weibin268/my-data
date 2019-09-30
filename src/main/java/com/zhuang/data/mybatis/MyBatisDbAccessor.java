@@ -163,13 +163,13 @@ public class MyBatisDbAccessor extends DbAccessor {
 
     @Override
     public <T> T select(Object objKey, Class<T> entityType) {
-        String mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entityType, objKey.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.SELECT);
+        String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlCommandType.SELECT, entityType, objKey.getClass());
         return queryEntity(mappedStatementId, objKey, entityType);
     }
 
     @Override
     public int insert(Object entity) {
-        String mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entity.getClass(), entity.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.INSERT);
+        String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlCommandType.INSERT, entity.getClass(), entity.getClass());
         return executeNonQuery(mappedStatementId, entity);
     }
 
@@ -184,16 +184,16 @@ public class MyBatisDbAccessor extends DbAccessor {
         if (excludeNullFields) {
             Map<String, Object> map = EntityUtils.entityToMap(entity, true);
             String[] propertyNames = map.keySet().toArray(new String[]{});
-            mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entity.getClass(), entity.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.UPDATE, propertyNames);
+            mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlCommandType.UPDATE, entity.getClass(), entity.getClass(), propertyNames);
         } else {
-            mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entity.getClass(), entity.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.UPDATE);
+            mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlCommandType.UPDATE, entity.getClass(), entity.getClass());
         }
         return executeNonQuery(mappedStatementId, entity);
     }
 
     @Override
     public <T> int delete(Object objKey, Class<T> entityType) {
-        String mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entityType, objKey.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.DELETE);
+        String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlCommandType.DELETE, entityType, objKey.getClass());
         return executeNonQuery(mappedStatementId, objKey);
     }
 
@@ -211,7 +211,7 @@ public class MyBatisDbAccessor extends DbAccessor {
         Map<String, Object> mapParams = EntityUtils.entityToMap(objParams, true);
         String[] propertyNames = new String[mapParams.keySet().size()];
         propertyNames = mapParams.keySet().toArray(propertyNames);
-        String mappedStatementId = MappedStatementUtils.getMappedStatementId(dbDialect, entityType, mapParams.getClass(), sqlSessionFactory.getConfiguration(), SqlCommandType.SELECT, propertyNames);
+        String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlCommandType.SELECT, entityType, mapParams.getClass(), propertyNames);
         return queryEntities(mappedStatementId, mapParams, entityType);
     }
 
