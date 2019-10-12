@@ -32,10 +32,12 @@ public class MyBatisDbAccessor extends DbAccessor {
     }
 
     public MyBatisDbAccessor(SqlSessionFactory sqlSessionFactory, boolean autoCommit) {
+        this(sqlSessionFactory, (autoCommit ? null : sqlSessionFactory.openSession()), autoCommit);
+    }
+
+    public MyBatisDbAccessor(SqlSessionFactory sqlSessionFactory, SqlSession sqlSession, boolean autoCommit) {
         this.sqlSessionFactory = sqlSessionFactory;
-        if (!autoCommit) {
-            this.globalSqlSession = sqlSessionFactory.openSession();
-        }
+        this.globalSqlSession = sqlSession;
         super.autoCommit = autoCommit;
         super.dbDialect = DbDialectUtils.getDbDialectByDataSource(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource());
     }
