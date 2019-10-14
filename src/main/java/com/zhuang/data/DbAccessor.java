@@ -72,7 +72,6 @@ public abstract class DbAccessor {
     abstract public <T> int delete(Object objKey, Class<T> entityType);
 
     abstract public int insertOrUpdate(Object entity);
-
     //endregion
 
     //region public static
