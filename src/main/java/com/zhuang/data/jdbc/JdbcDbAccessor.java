@@ -217,4 +217,9 @@ public class JdbcDbAccessor extends DbAccessor {
 	public <T> T selectOne(Object objParams, Class<T> entityType) {
 		return null;
 	}
+
+	@Override
+	public int selectCount(Object objParams, Class entityType) {
+		return 0;
+	}
 }

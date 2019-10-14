@@ -61,6 +61,8 @@ public abstract class DbAccessor {
 
     abstract public <T> T selectOne(Object objParams, Class<T> entityType);
 
+    abstract public int selectCount(Object objParams, Class entityType);
+
     abstract public int insert(Object entity);
 
     abstract public int update(Object entity);

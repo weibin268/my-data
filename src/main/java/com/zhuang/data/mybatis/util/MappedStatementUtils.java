@@ -2,8 +2,10 @@ package com.zhuang.data.mybatis.util;
 
 import com.zhuang.data.enums.DbDialect;
 import com.zhuang.data.orm.enums.PlaceHolderType;
+import com.zhuang.data.orm.enums.SqlType;
 import com.zhuang.data.orm.mapping.ColumnMapping;
 import com.zhuang.data.orm.mapping.TableMapping;
+import com.zhuang.data.orm.util.SqlBuilderUtils;
 import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
@@ -16,12 +18,13 @@ public class MappedStatementUtils {
 
     private static Logger logger = LoggerFactory.getLogger(MappedStatementUtils.class);
 
-    public static <T> String getMappedStatementId(Configuration configuration, DbDialect dbDialect, SqlCommandType sqlCommandType, Class<T> entityType, Class<?> parameterType) {
-        return getMappedStatementId(configuration, dbDialect, sqlCommandType, entityType, parameterType, null);
+    public static <T> String getMappedStatementId(Configuration configuration, DbDialect dbDialect, SqlType sqlType, Class<T> entityType, Class<?> parameterType) {
+        return getMappedStatementId(configuration, dbDialect, sqlType, entityType, parameterType, null);
     }
 
-    public static <T> String getMappedStatementId(Configuration configuration, DbDialect dbDialect, SqlCommandType sqlCommandType, Class<T> entityType, Class<?> parameterType, String[] propertyNames) {
-        String mappedStatementId = entityType.getName() + "_" + sqlCommandType + "_" + parameterType.getName();
+    public static <T> String getMappedStatementId(Configuration configuration, DbDialect dbDialect, SqlType sqlType, Class<T> entityType, Class<?> parameterType, String[] propertyNames) {
+        SqlCommandType sqlCommandType = SqlCommandTypeUtils.getBySqlType(sqlType);
+        String mappedStatementId = entityType.getName() + "_" + sqlType + "_" + parameterType.getName();
         if (hasPropertyNames(propertyNames)) {
             mappedStatementId = mappedStatementId + "_" + String.join(".", propertyNames);
         }
@@ -42,9 +45,10 @@ public class MappedStatementUtils {
                     }
                 }
             }
-            String sql = SqlBuilderUtils.getSql(dbDialect, tableMapping, PlaceHolderType.NumberSign, sqlCommandType);
+            String sql = SqlBuilderUtils.getSql(dbDialect, tableMapping, PlaceHolderType.NumberSign, sqlType);
             logger.debug("Sql:" + sql);
-            configuration.addMappedStatement(createMappedStatement(configuration, mappedStatementId, sql, sqlCommandType, parameterType, entityType));
+            Class<?> resultType = sqlType == SqlType.SELECT_COUNT ? Integer.class : entityType;
+            configuration.addMappedStatement(createMappedStatement(configuration, mappedStatementId, sql, sqlCommandType, parameterType, resultType));
         }
         return mappedStatementId;
     }
