@@ -36,7 +36,7 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
             lsSelect.add(resolveColumnName(col.getColumnName()) + " as " + col.getPropertyName());
         }
         for (ColumnMapping keyCol : keyColumns) {
-            lsWhere.add(resolveColumnName(keyCol.getColumnName()) + "=" + getPlaceHolder(placeHolderType, keyCol.getColumnName()));
+            lsWhere.add(resolveColumnName(keyCol.getColumnName()) + " = " + getPlaceHolder(placeHolderType, keyCol.getColumnName()));
             parameterOrder.put(keyCol.getPropertyName(), order++);
         }
         String strSelect = String.join(" , ", lsSelect);
@@ -62,8 +62,8 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
             lsParameterNames.add(getPlaceHolder(placeHolderType, col.getColumnName()));
             parameterOrder.put(col.getPropertyName(), order++);
         }
-        String strColumnNames = String.join(",", lsColumnNames);
-        String strParameterNames = String.join(",", lsParameterNames);
+        String strColumnNames = String.join(" , ", lsColumnNames);
+        String strParameterNames = String.join(" , ", lsParameterNames);
         StringBuilder sbSql = new StringBuilder();
         sbSql.append("INSERT INTO ").append(tableMapping.getTableName()).append("(").append(strColumnNames).append(") VALUES(").append(strParameterNames).append(")");
         result.setParametersIndex(parameterOrder);
@@ -84,11 +84,11 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
         if (updateColumns.size() < 1)
             throw new OrmException("实体没有对应要更新到数据的属性！");
         for (ColumnMapping col : updateColumns) {
-            lsUpdateSet.add(resolveColumnName(col.getColumnName()) + "=" + getPlaceHolder(placeHolderType, col.getColumnName()));
+            lsUpdateSet.add(resolveColumnName(col.getColumnName()) + " = " + getPlaceHolder(placeHolderType, col.getColumnName()));
             parameterOrder.put(col.getPropertyName(), order++);
         }
         for (ColumnMapping keyCol : keyColumns) {
-            lsWhere.add(resolveColumnName(keyCol.getColumnName()) + "=" + getPlaceHolder(placeHolderType, keyCol.getColumnName()));
+            lsWhere.add(resolveColumnName(keyCol.getColumnName()) + " = " + getPlaceHolder(placeHolderType, keyCol.getColumnName()));
             parameterOrder.put(keyCol.getPropertyName(), order++);
         }
         String strUpdateSet = String.join(" , ", lsUpdateSet);
@@ -109,7 +109,7 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
         if (keyColumns.size() < 1)
             throw new OrmException("实体没有设置主键！");
         for (ColumnMapping keyCol : keyColumns) {
-            lsWhere.add(resolveColumnName(keyCol.getColumnName()) + "=" + getPlaceHolder(placeHolderType, keyCol.getColumnName()));
+            lsWhere.add(resolveColumnName(keyCol.getColumnName()) + " = " + getPlaceHolder(placeHolderType, keyCol.getColumnName()));
             parameterOrder.put(keyCol.getPropertyName(), order++);
         }
         String strWhere = String.join(" AND ", lsWhere);
