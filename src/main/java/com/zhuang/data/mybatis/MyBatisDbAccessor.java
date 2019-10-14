@@ -228,7 +228,7 @@ public class MyBatisDbAccessor extends DbAccessor {
     }
 
     @Override
-    public <T> int delete(Object objKey, Class<T> entityType) {
+    public int delete(Object objKey, Class entityType) {
         String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlType.DELETE, entityType, objKey.getClass());
         return executeNonQuery(mappedStatementId, objKey);
     }
