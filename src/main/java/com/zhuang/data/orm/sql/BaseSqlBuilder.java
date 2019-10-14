@@ -48,6 +48,27 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
         return result;
     }
 
+    public BuildResult buildSelectCount() {
+        BuildResult result = new BuildResult();
+        Map<String, Integer> parameterOrder = new HashMap<String, Integer>();
+        int order = 1;
+        List<ColumnMapping> keyColumns = tableMapping.getKeyColumns();
+        List<String> lsWhere = new ArrayList<String>();
+        if (keyColumns.size() < 1)
+            throw new OrmException("实体没有设置主键！");
+
+        for (ColumnMapping keyCol : keyColumns) {
+            lsWhere.add(resolveColumnName(keyCol.getColumnName()) + " = " + getPlaceHolder(placeHolderType, keyCol.getColumnName()));
+            parameterOrder.put(keyCol.getPropertyName(), order++);
+        }
+        String strWhere = String.join(" AND ", lsWhere);
+        StringBuilder sbSql = new StringBuilder();
+        sbSql.append("SELECT ").append("count(1)").append(" FROM ").append(tableMapping.getTableName()).append(" WHERE ").append(strWhere);
+        result.setParametersIndex(parameterOrder);
+        result.setSql(sbSql.toString());
+        return result;
+    }
+
     public BuildResult buildInsert() {
         BuildResult result = new BuildResult();
         Map<String, Integer> parameterOrder = new HashMap<String, Integer>();

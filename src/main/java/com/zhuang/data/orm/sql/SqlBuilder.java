@@ -4,6 +4,8 @@ public interface SqlBuilder {
 
     BuildResult buildSelect();
 
+    BuildResult buildSelectCount();
+
     BuildResult buildInsert();
 
     BuildResult buildUpdate();

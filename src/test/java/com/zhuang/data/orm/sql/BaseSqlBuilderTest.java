@@ -15,9 +15,12 @@ public class BaseSqlBuilderTest {
 
     @Test
     public void buildSelect() throws Exception {
-
         System.out.println(sqlBuilder.buildSelect().getSql());
+    }
 
+    @Test
+    public void buildSelectCount() throws Exception {
+        System.out.println(sqlBuilder.buildSelectCount().getSql());
     }
 
     @Test
@@ -27,15 +30,12 @@ public class BaseSqlBuilderTest {
 
     @Test
     public void buildUpdate() throws Exception {
-
         System.out.println(sqlBuilder.buildUpdate().getSql());
     }
 
     @Test
     public void buildDelete() throws Exception {
-
         System.out.println(sqlBuilder.buildDelete().getSql());
-
     }
 
 }
