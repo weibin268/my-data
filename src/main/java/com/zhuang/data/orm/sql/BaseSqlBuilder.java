@@ -25,7 +25,6 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
         BuildResult result = new BuildResult();
         Map<String, Integer> parameterOrder = new HashMap<String, Integer>();
         int order = 1;
-        StringBuilder sbSql = new StringBuilder();
         List<ColumnMapping> columns = tableMapping.getColumns();
         List<ColumnMapping> keyColumns = tableMapping.getKeyColumns();
         List<String> lsSelect = new ArrayList<String>();
@@ -40,31 +39,33 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
             lsWhere.add(resolveColumnName(keyCol.getColumnName()) + "=" + getPlaceHolder(placeHolderType, keyCol.getColumnName()));
             parameterOrder.put(keyCol.getPropertyName(), order++);
         }
-        sbSql.append("SELECT " + String.join(" , ", lsSelect) + " FROM " + tableMapping.getTableName() + " WHERE "
-                + String.join(" AND ", lsWhere));
+        String strSelect = String.join(" , ", lsSelect);
+        String strWhere = String.join(" AND ", lsWhere);
+        StringBuilder sbSql = new StringBuilder();
+        sbSql.append("SELECT ").append(strSelect).append(" FROM ").append(tableMapping.getTableName()).append(" WHERE ").append(strWhere);
         result.setParametersIndex(parameterOrder);
         result.setSql(sbSql.toString());
         return result;
-
     }
 
     public BuildResult buildInsert() {
         BuildResult result = new BuildResult();
         Map<String, Integer> parameterOrder = new HashMap<String, Integer>();
         int order = 1;
-        StringBuilder sbSql = new StringBuilder();
         List<ColumnMapping> insertColumns = tableMapping.getInsertColumns();
-        List<String> columnNameList = new ArrayList<String>();
+        List<String> lsColumnNames = new ArrayList<String>();
         List<String> lsParameterNames = new ArrayList<String>();
         if (insertColumns.size() < 1)
             throw new OrmException("实体没有对应要插入到数据的属性！");
         for (ColumnMapping col : insertColumns) {
-            columnNameList.add(resolveColumnName(col.getColumnName()));
+            lsColumnNames.add(resolveColumnName(col.getColumnName()));
             lsParameterNames.add(getPlaceHolder(placeHolderType, col.getColumnName()));
             parameterOrder.put(col.getPropertyName(), order++);
         }
-        sbSql.append("INSERT INTO " + tableMapping.getTableName() + "(" + String.join(",", columnNameList) + ") VALUES("
-                + String.join(",", lsParameterNames) + ")");
+        String strColumnNames = String.join(",", lsColumnNames);
+        String strParameterNames = String.join(",", lsParameterNames);
+        StringBuilder sbSql = new StringBuilder();
+        sbSql.append("INSERT INTO ").append(tableMapping.getTableName()).append("(").append(strColumnNames).append(") VALUES(").append(strParameterNames).append(")");
         result.setParametersIndex(parameterOrder);
         result.setSql(sbSql.toString());
         return result;
@@ -74,7 +75,6 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
         BuildResult result = new BuildResult();
         Map<String, Integer> parameterOrder = new HashMap<String, Integer>();
         int order = 1;
-        StringBuilder sbSql = new StringBuilder();
         List<ColumnMapping> updateColumns = tableMapping.getUpdateColumns();
         List<ColumnMapping> keyColumns = tableMapping.getKeyColumns();
         List<String> lsUpdateSet = new ArrayList<String>();
@@ -91,8 +91,10 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
             lsWhere.add(resolveColumnName(keyCol.getColumnName()) + "=" + getPlaceHolder(placeHolderType, keyCol.getColumnName()));
             parameterOrder.put(keyCol.getPropertyName(), order++);
         }
-        sbSql.append("UPDATE " + tableMapping.getTableName() + " SET "
-                + String.join(" , ", lsUpdateSet) + "  WHERE " + String.join(" AND ", lsWhere));
+        String strUpdateSet = String.join(" , ", lsUpdateSet);
+        String strWhere = String.join(" AND ", lsWhere);
+        StringBuilder sbSql = new StringBuilder();
+        sbSql.append("UPDATE ").append(tableMapping.getTableName()).append(" SET ").append(strUpdateSet).append(" WHERE ").append(strWhere);
         result.setParametersIndex(parameterOrder);
         result.setSql(sbSql.toString());
         return result;
@@ -102,7 +104,6 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
         BuildResult result = new BuildResult();
         Map<String, Integer> parameterOrder = new HashMap<String, Integer>();
         int order = 1;
-        StringBuilder sbSql = new StringBuilder();
         List<ColumnMapping> keyColumns = tableMapping.getKeyColumns();
         List<String> lsWhere = new ArrayList<String>();
         if (keyColumns.size() < 1)
@@ -111,8 +112,9 @@ public abstract class BaseSqlBuilder implements SqlBuilder {
             lsWhere.add(resolveColumnName(keyCol.getColumnName()) + "=" + getPlaceHolder(placeHolderType, keyCol.getColumnName()));
             parameterOrder.put(keyCol.getPropertyName(), order++);
         }
-        sbSql.append("DELETE FROM ").append(tableMapping.getTableName()).append(" WHERE ")
-                .append(String.join(" AND ", lsWhere));
+        String strWhere = String.join(" AND ", lsWhere);
+        StringBuilder sbSql = new StringBuilder();
+        sbSql.append("DELETE FROM ").append(tableMapping.getTableName()).append(" WHERE ").append(strWhere);
         result.setParametersIndex(parameterOrder);
         result.setSql(sbSql.toString());
         return result;
