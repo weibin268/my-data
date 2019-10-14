@@ -132,6 +132,21 @@ public class JdbcDbAccessor extends DbAccessor {
     }
 
     @Override
+    public <T> List<T> selectList(Object objParams, Class<T> entityType) {
+        return null;
+    }
+
+    @Override
+    public <T> T selectOne(Object objParams, Class<T> entityType) {
+        return null;
+    }
+
+    @Override
+    public int selectCount(Object objParams, Class entityType) {
+        return 0;
+    }
+
+    @Override
     public int insert(Object entity) {
         SqlBuilder sqlBuilder = SqlBuilderFactory.createSqlBuilder(dbDialect, new TableMapping(entity.getClass()), PlaceHolderType.QuestionMark);
         BuildResult buildResult = sqlBuilder.buildInsert();
@@ -176,6 +191,16 @@ public class JdbcDbAccessor extends DbAccessor {
     }
 
     @Override
+    public int update(Object entity, boolean excludeNullFields) {
+        return 0;
+    }
+
+    @Override
+    public int insertOrUpdate(Object entity) {
+        return 0;
+    }
+
+    @Override
     public int delete(Object objKey, Class entityType) {
         SqlBuilder sqlBuilder = SqlBuilderFactory.createSqlBuilder(dbDialect, new TableMapping(entityType), PlaceHolderType.QuestionMark);
         BuildResult buildResult = sqlBuilder.buildDelete();
@@ -196,30 +221,5 @@ public class JdbcDbAccessor extends DbAccessor {
             }
         }
 
-    }
-
-    @Override
-    public int update(Object entity, boolean excludeNullFields) {
-        return 0;
-    }
-
-    @Override
-    public int insertOrUpdate(Object entity) {
-        return 0;
-    }
-
-    @Override
-    public <T> List<T> selectList(Object objParams, Class<T> entityType) {
-        return null;
-    }
-
-    @Override
-    public <T> T selectOne(Object objParams, Class<T> entityType) {
-        return null;
-    }
-
-    @Override
-    public int selectCount(Object objParams, Class entityType) {
-        return 0;
     }
 }
