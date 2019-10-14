@@ -171,6 +171,30 @@ public class MyBatisDbAccessor extends DbAccessor {
     }
 
     @Override
+    public <T> List<T> selectList(Object objParams, Class<T> entityType) {
+        Map<String, Object> mapParams = EntityUtils.entityToMap(objParams, true);
+        String[] propertyNames = new String[mapParams.keySet().size()];
+        propertyNames = mapParams.keySet().toArray(propertyNames);
+        String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlType.SELECT, entityType, mapParams.getClass(), propertyNames);
+        return queryEntities(mappedStatementId, mapParams, entityType);
+    }
+
+    @Override
+    public <T> T selectOne(Object objParams, Class<T> entityType) {
+        List<T> list = selectList(objParams, entityType);
+        return list.size() > 0 ? list.get(0) : null;
+    }
+
+    @Override
+    public int selectCount(Object objParams, Class entityType) {
+        Map<String, Object> mapParams = EntityUtils.entityToMap(objParams, true);
+        String[] propertyNames = new String[mapParams.keySet().size()];
+        propertyNames = mapParams.keySet().toArray(propertyNames);
+        String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlType.SELECT_COUNT, entityType, mapParams.getClass(), propertyNames);
+        return queryEntity(mappedStatementId, mapParams, Integer.class);
+    }
+
+    @Override
     public int insert(Object entity) {
         String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlType.INSERT, entity.getClass(), entity.getClass());
         return executeNonQuery(mappedStatementId, entity);
@@ -195,12 +219,6 @@ public class MyBatisDbAccessor extends DbAccessor {
     }
 
     @Override
-    public <T> int delete(Object objKey, Class<T> entityType) {
-        String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlType.DELETE, entityType, objKey.getClass());
-        return executeNonQuery(mappedStatementId, objKey);
-    }
-
-    @Override
     public int insertOrUpdate(Object entity) {
         int result = update(entity);
         if (result < 1) {
@@ -210,27 +228,9 @@ public class MyBatisDbAccessor extends DbAccessor {
     }
 
     @Override
-    public <T> List<T> selectList(Object objParams, Class<T> entityType) {
-        Map<String, Object> mapParams = EntityUtils.entityToMap(objParams, true);
-        String[] propertyNames = new String[mapParams.keySet().size()];
-        propertyNames = mapParams.keySet().toArray(propertyNames);
-        String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlType.SELECT, entityType, mapParams.getClass(), propertyNames);
-        return queryEntities(mappedStatementId, mapParams, entityType);
-    }
-
-    @Override
-    public <T> T selectOne(Object objParams, Class<T> entityType) {
-        List<T> list = selectList(objParams, entityType);
-        return list.size() > 0 ? list.get(0) : null;
-    }
-
-    @Override
-    public int selectCount(Object objParams, Class entityType) {
-        Map<String, Object> mapParams = EntityUtils.entityToMap(objParams, true);
-        String[] propertyNames = new String[mapParams.keySet().size()];
-        propertyNames = mapParams.keySet().toArray(propertyNames);
-        String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlType.SELECT_COUNT, entityType, mapParams.getClass(), propertyNames);
-        return queryEntity(mappedStatementId, mapParams, Integer.class);
+    public <T> int delete(Object objKey, Class<T> entityType) {
+        String mappedStatementId = MappedStatementUtils.getMappedStatementId(sqlSessionFactory.getConfiguration(), dbDialect, SqlType.DELETE, entityType, objKey.getClass());
+        return executeNonQuery(mappedStatementId, objKey);
     }
 
     private <T> T queryEntity(String sql, Object parameter, SqlSession sqlSession) {

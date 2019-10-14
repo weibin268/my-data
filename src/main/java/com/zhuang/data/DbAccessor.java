@@ -69,9 +69,9 @@ public abstract class DbAccessor {
 
     abstract public int update(Object entity, boolean excludeNullFields);
 
-    abstract public <T> int delete(Object objKey, Class<T> entityType);
-
     abstract public int insertOrUpdate(Object entity);
+
+    abstract public <T> int delete(Object objKey, Class<T> entityType);
     //endregion
 
     //region public static
