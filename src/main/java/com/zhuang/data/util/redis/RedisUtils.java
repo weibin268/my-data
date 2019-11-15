@@ -1,4 +1,4 @@
-package com.zhuang.data.redis;
+package com.zhuang.data.util.redis;
 
 import com.zhuang.data.config.MyDataProperties;
 

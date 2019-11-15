@@ -13,8 +13,7 @@ public class SqlUtils {
         return result;
     }
 
-    public static String removeSqlKeyWord(String text)
-    {
+    public static String removeSqlKeyWord(String text) {
         return sqlKeyWordPattern.matcher(text).replaceAll("");
     }
 }
