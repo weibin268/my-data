@@ -53,7 +53,8 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
     @Override
     public boolean visit(MySqlInsertStatement x) {
         SQLExprTableSource tableSource = x.getTableSource();
-        if (!checkTableName(tableSource.getName())) return true;
+        TableInfo tableInfo = getTableInfoByName(tableSource.getName());
+        if (tableInfo == null) return true;
         List<SQLExpr> exprColumnList = x.getColumns();
         List<SQLInsertStatement.ValuesClause> valuesClauseList = x.getValuesList();
         if (exprColumnList.stream().anyMatch(c -> ((SQLIdentifierExpr) c).getName().equalsIgnoreCase(fieldName))) {
@@ -72,8 +73,9 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
     private void visit4HasWhere(Object target, SQLTableSource tableSource) {
         if (tableSource instanceof SQLExprTableSource) {
             SQLExprTableSource exprTableSource = (SQLExprTableSource) tableSource;
-            if (checkTableName(exprTableSource.getName())) {
-                modify4HasWhere(target, exprTableSource.getAlias());
+            TableInfo tableInfo = getTableInfoByName(exprTableSource.getName());
+            if (tableInfo != null) {
+                modify4HasWhere(target, tableInfo, exprTableSource.getAlias());
             }
         } else if (tableSource instanceof SQLJoinTableSource) {
             SQLJoinTableSource joinTableSource = (SQLJoinTableSource) tableSource;
@@ -81,40 +83,45 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
             SQLTableSource rightTableSource = joinTableSource.getRight();
             if (leftTableSource instanceof SQLExprTableSource) {
                 SQLExprTableSource leftExprTableSource = (SQLExprTableSource) leftTableSource;
-                if (checkTableName(leftExprTableSource.getName())) {
+                TableInfo tableInfo = getTableInfoByName(leftExprTableSource.getName());
+                if (tableInfo != null) {
                     String alias = leftExprTableSource.getAlias() == null ? leftExprTableSource.getName().getSimpleName() : leftExprTableSource.getAlias();
-                    modify4HasWhere(target, alias);
+                    modify4HasWhere(target, tableInfo, alias);
                 }
             }
             if (rightTableSource instanceof SQLExprTableSource) {
                 SQLExprTableSource rightExprTableSource = (SQLExprTableSource) rightTableSource;
-                if (checkTableName(rightExprTableSource.getName())) {
+                TableInfo tableInfo = getTableInfoByName(rightExprTableSource.getName());
+                if (tableInfo != null) {
                     String alias = rightExprTableSource.getAlias() == null ? rightExprTableSource.getName().getSimpleName() : rightExprTableSource.getAlias();
-                    modify4HasWhere(target, alias);
+                    modify4HasWhere(target, tableInfo, alias);
                 }
             }
         }
     }
 
-    private void modify4HasWhere(Object target, String alias) {
+    private void modify4HasWhere(Object target, TableInfo tableInfo, String alias) {
         if (target instanceof MySqlSelectQueryBlock) {
             MySqlSelectQueryBlock statement = (MySqlSelectQueryBlock) target;
-            statement.setWhere(appendWhereExpr(statement.getWhere(), getAppendWhere(alias)));
+            SQLExpr whereExpr = statement.getWhere();
+            statement.setWhere(appendWhereExpr(whereExpr, getAppendWhere(alias)));
         } else if (target instanceof MySqlUpdateStatement) {
             MySqlUpdateStatement statement = (MySqlUpdateStatement) target;
-            statement.setWhere(appendWhereExpr(statement.getWhere(), getAppendWhere(alias)));
+            SQLExpr whereExpr = statement.getWhere();
+            statement.setWhere(appendWhereExpr(whereExpr, getAppendWhere(alias)));
         } else if (target instanceof MySqlDeleteStatement) {
             MySqlDeleteStatement statement = (MySqlDeleteStatement) target;
-            statement.setWhere(appendWhereExpr(statement.getWhere(), getAppendWhere(alias)));
+            SQLExpr whereExpr = statement.getWhere();
+            statement.setWhere(appendWhereExpr(whereExpr, getAppendWhere(alias)));
         }
     }
 
-    private boolean checkTableName(SQLName sqlName) {
-        return checkTableName(sqlName.getSimpleName());
+    private TableInfo getTableInfoByName(SQLName tableName) {
+        return getTableInfoByName(tableName.getSimpleName());
     }
 
-    private boolean checkTableName(String tableName) {
-        return tableInfoList.stream().anyMatch(c -> c.getName().equalsIgnoreCase(tableName));
+    private TableInfo getTableInfoByName(String tableName) {
+        return tableInfoList.stream().filter(c -> c.getName().equalsIgnoreCase(tableName)).findFirst().orElse(null);
     }
 
     private SQLExpr appendWhereExpr(SQLExpr whereExpr, String appendWhere) {
