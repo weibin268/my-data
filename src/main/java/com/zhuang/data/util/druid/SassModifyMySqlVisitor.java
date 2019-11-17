@@ -104,14 +104,17 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
         if (target instanceof MySqlSelectQueryBlock) {
             MySqlSelectQueryBlock statement = (MySqlSelectQueryBlock) target;
             SQLExpr whereExpr = statement.getWhere();
+            if (existsPrimaryKeyInWhere(whereExpr, tableInfo.getPrimaryKey(), alias)) return;
             statement.setWhere(appendWhereExpr(whereExpr, getAppendWhere(alias)));
         } else if (target instanceof MySqlUpdateStatement) {
             MySqlUpdateStatement statement = (MySqlUpdateStatement) target;
             SQLExpr whereExpr = statement.getWhere();
+            if (existsPrimaryKeyInWhere(whereExpr, tableInfo.getPrimaryKey(), alias)) return;
             statement.setWhere(appendWhereExpr(whereExpr, getAppendWhere(alias)));
         } else if (target instanceof MySqlDeleteStatement) {
             MySqlDeleteStatement statement = (MySqlDeleteStatement) target;
             SQLExpr whereExpr = statement.getWhere();
+            if (existsPrimaryKeyInWhere(whereExpr, tableInfo.getPrimaryKey(), alias)) return;
             statement.setWhere(appendWhereExpr(whereExpr, getAppendWhere(alias)));
         }
     }
@@ -131,7 +134,7 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
         if (whereExpr == null) {
             result = appendWhereExpr;
         } else {
-            if (!existsWhereExpr(whereExpr, ((SQLBinaryOpExpr) appendWhereExpr).getLeft())) {
+            if (!existsFieldInWhere(whereExpr, ((SQLBinaryOpExpr) appendWhereExpr).getLeft())) {
                 SQLBinaryOpExpr newWhereExpr = new SQLBinaryOpExpr(whereExpr, SQLBinaryOperator.BooleanAnd, appendWhereExpr);
                 result = newWhereExpr;
             } else {
@@ -144,19 +147,49 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
         return result;
     }
 
-    private boolean existsWhereExpr(SQLExpr whereExpr, SQLExpr appendFieldExpr) {
+    private boolean existsPrimaryKeyInWhere(SQLExpr whereExpr, String primaryKey, String alias) {
+        if (primaryKey == null) return false;
         if (!(whereExpr instanceof SQLBinaryOpExpr)) return false;
         SQLBinaryOpExpr whereBinaryOpExpr = (SQLBinaryOpExpr) whereExpr;
-        if (sameFieldExpr(whereBinaryOpExpr.getLeft(), appendFieldExpr)) {
+        if (isPrimaryKeyField(whereBinaryOpExpr.getLeft(), primaryKey, alias)) {
             return true;
         }
-        if (sameFieldExpr(whereBinaryOpExpr.getRight(), appendFieldExpr)) {
+        if (isPrimaryKeyField(whereBinaryOpExpr.getRight(), primaryKey, alias)) {
             return true;
         }
         return false;
     }
 
-    public boolean sameFieldExpr(SQLExpr fieldExpr, SQLExpr appendFieldExpr) {
+    private boolean isPrimaryKeyField(SQLExpr fieldExpr, String primaryKey, String alias) {
+        if (fieldExpr instanceof SQLPropertyExpr) {
+            SQLPropertyExpr fieldPropertyExpr = (SQLPropertyExpr) fieldExpr;
+            if (fieldPropertyExpr.getName().equalsIgnoreCase(primaryKey) && fieldPropertyExpr.getOwnernName().equalsIgnoreCase(alias)) {
+                return true;
+            }
+        } else if (fieldExpr instanceof SQLIdentifierExpr) {
+            SQLIdentifierExpr fieldIdentifierExpr = (SQLIdentifierExpr) fieldExpr;
+            if (fieldIdentifierExpr.getName().equalsIgnoreCase(primaryKey)) {
+                return true;
+            }
+        } else if (fieldExpr instanceof SQLBinaryOpExpr) {
+            return existsPrimaryKeyInWhere(fieldExpr, primaryKey, alias);
+        }
+        return false;
+    }
+
+    private boolean existsFieldInWhere(SQLExpr whereExpr, SQLExpr appendFieldExpr) {
+        if (!(whereExpr instanceof SQLBinaryOpExpr)) return false;
+        SQLBinaryOpExpr whereBinaryOpExpr = (SQLBinaryOpExpr) whereExpr;
+        if (sameField(whereBinaryOpExpr.getLeft(), appendFieldExpr)) {
+            return true;
+        }
+        if (sameField(whereBinaryOpExpr.getRight(), appendFieldExpr)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean sameField(SQLExpr fieldExpr, SQLExpr appendFieldExpr) {
         if (fieldExpr.getClass().getName().equals(appendFieldExpr.getClass().getName())) {
             if (appendFieldExpr instanceof SQLPropertyExpr) {
                 SQLPropertyExpr appendFieldPropertyExpr = (SQLPropertyExpr) appendFieldExpr;
@@ -172,13 +205,9 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
                 }
             }
         } else if (fieldExpr instanceof SQLBinaryOpExpr) {
-            return existsWhereExpr(fieldExpr, appendFieldExpr);
+            return existsFieldInWhere(fieldExpr, appendFieldExpr);
         }
         return false;
-    }
-
-    private String getAppendWhere() {
-        return getAppendWhere(null);
     }
 
     private String getAppendWhere(String alias) {
