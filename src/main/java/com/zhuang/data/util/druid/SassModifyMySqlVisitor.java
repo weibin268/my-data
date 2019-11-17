@@ -21,13 +21,13 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
     private boolean hasModify = false;
     private String dbType = JdbcConstants.MYSQL;
 
-    private List<String> tableNameList;
+    private List<TableInfo> tableInfoList;
     private String fieldName;
     Supplier<String> valueSupplier;
 
 
-    public SassModifyMySqlVisitor(List<String> tableNameList, String fieldName, Supplier<String> valueSupplier) {
-        this.tableNameList = tableNameList;
+    public SassModifyMySqlVisitor(List<TableInfo> tableInfoList, String fieldName, Supplier<String> valueSupplier) {
+        this.tableInfoList = tableInfoList;
         this.fieldName = fieldName;
         this.valueSupplier = valueSupplier;
     }
@@ -114,7 +114,7 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
     }
 
     private boolean checkTableName(String tableName) {
-        return tableNameList.stream().anyMatch(c -> c.equalsIgnoreCase(tableName));
+        return tableInfoList.stream().anyMatch(c -> c.getName().equalsIgnoreCase(tableName));
     }
 
     private SQLExpr appendWhereExpr(SQLExpr whereExpr, String appendWhere) {
@@ -184,5 +184,31 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
 
     public boolean hasModify() {
         return this.hasModify;
+    }
+
+    public static class TableInfo {
+        private String name;
+        private String primaryKey;
+
+        public TableInfo(String name, String primaryKey) {
+            this.name = name;
+            this.primaryKey = primaryKey;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getPrimaryKey() {
+            return primaryKey;
+        }
+
+        public void setPrimaryKey(String primaryKey) {
+            this.primaryKey = primaryKey;
+        }
     }
 }
