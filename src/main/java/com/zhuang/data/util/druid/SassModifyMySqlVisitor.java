@@ -21,13 +21,13 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
     private boolean hasModify = false;
     private String dbType = JdbcConstants.MYSQL;
 
-    private List<String> tableNameList;
+    private List<TableInfo> tableInfoList;
     private String fieldName;
     Supplier<String> valueSupplier;
 
 
-    public SassModifyMySqlVisitor(List<String> tableNameList, String fieldName, Supplier<String> valueSupplier) {
-        this.tableNameList = tableNameList;
+    public SassModifyMySqlVisitor(List<TableInfo> tableInfoList, String fieldName, Supplier<String> valueSupplier) {
+        this.tableInfoList = tableInfoList;
         this.fieldName = fieldName;
         this.valueSupplier = valueSupplier;
     }
@@ -53,7 +53,8 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
     @Override
     public boolean visit(MySqlInsertStatement x) {
         SQLExprTableSource tableSource = x.getTableSource();
-        if (!checkTableName(tableSource.getName())) return true;
+        TableInfo tableInfo = getTableInfoByName(tableSource.getName());
+        if (tableInfo == null) return true;
         List<SQLExpr> exprColumnList = x.getColumns();
         List<SQLInsertStatement.ValuesClause> valuesClauseList = x.getValuesList();
         if (exprColumnList.stream().anyMatch(c -> ((SQLIdentifierExpr) c).getName().equalsIgnoreCase(fieldName))) {
@@ -72,8 +73,9 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
     private void visit4HasWhere(Object target, SQLTableSource tableSource) {
         if (tableSource instanceof SQLExprTableSource) {
             SQLExprTableSource exprTableSource = (SQLExprTableSource) tableSource;
-            if (checkTableName(exprTableSource.getName())) {
-                modify4HasWhere(target, exprTableSource.getAlias());
+            TableInfo tableInfo = getTableInfoByName(exprTableSource.getName());
+            if (tableInfo != null) {
+                modify4HasWhere(target, tableInfo, exprTableSource.getAlias());
             }
         } else if (tableSource instanceof SQLJoinTableSource) {
             SQLJoinTableSource joinTableSource = (SQLJoinTableSource) tableSource;
@@ -81,40 +83,48 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
             SQLTableSource rightTableSource = joinTableSource.getRight();
             if (leftTableSource instanceof SQLExprTableSource) {
                 SQLExprTableSource leftExprTableSource = (SQLExprTableSource) leftTableSource;
-                if (checkTableName(leftExprTableSource.getName())) {
+                TableInfo tableInfo = getTableInfoByName(leftExprTableSource.getName());
+                if (tableInfo != null) {
                     String alias = leftExprTableSource.getAlias() == null ? leftExprTableSource.getName().getSimpleName() : leftExprTableSource.getAlias();
-                    modify4HasWhere(target, alias);
+                    modify4HasWhere(target, tableInfo, alias);
                 }
             }
             if (rightTableSource instanceof SQLExprTableSource) {
                 SQLExprTableSource rightExprTableSource = (SQLExprTableSource) rightTableSource;
-                if (checkTableName(rightExprTableSource.getName())) {
+                TableInfo tableInfo = getTableInfoByName(rightExprTableSource.getName());
+                if (tableInfo != null) {
                     String alias = rightExprTableSource.getAlias() == null ? rightExprTableSource.getName().getSimpleName() : rightExprTableSource.getAlias();
-                    modify4HasWhere(target, alias);
+                    modify4HasWhere(target, tableInfo, alias);
                 }
             }
         }
     }
 
-    private void modify4HasWhere(Object target, String alias) {
+    private void modify4HasWhere(Object target, TableInfo tableInfo, String alias) {
         if (target instanceof MySqlSelectQueryBlock) {
             MySqlSelectQueryBlock statement = (MySqlSelectQueryBlock) target;
-            statement.setWhere(appendWhereExpr(statement.getWhere(), getAppendWhere(alias)));
+            SQLExpr whereExpr = statement.getWhere();
+            if (existsPrimaryKeyInWhere(whereExpr, tableInfo.getPrimaryKey(), alias)) return;
+            statement.setWhere(appendWhereExpr(whereExpr, getAppendWhere(alias)));
         } else if (target instanceof MySqlUpdateStatement) {
             MySqlUpdateStatement statement = (MySqlUpdateStatement) target;
-            statement.setWhere(appendWhereExpr(statement.getWhere(), getAppendWhere(alias)));
+            SQLExpr whereExpr = statement.getWhere();
+            if (existsPrimaryKeyInWhere(whereExpr, tableInfo.getPrimaryKey(), alias)) return;
+            statement.setWhere(appendWhereExpr(whereExpr, getAppendWhere(alias)));
         } else if (target instanceof MySqlDeleteStatement) {
             MySqlDeleteStatement statement = (MySqlDeleteStatement) target;
-            statement.setWhere(appendWhereExpr(statement.getWhere(), getAppendWhere(alias)));
+            SQLExpr whereExpr = statement.getWhere();
+            if (existsPrimaryKeyInWhere(whereExpr, tableInfo.getPrimaryKey(), alias)) return;
+            statement.setWhere(appendWhereExpr(whereExpr, getAppendWhere(alias)));
         }
     }
 
-    private boolean checkTableName(SQLName sqlName) {
-        return checkTableName(sqlName.getSimpleName());
+    private TableInfo getTableInfoByName(SQLName tableName) {
+        return getTableInfoByName(tableName.getSimpleName());
     }
 
-    private boolean checkTableName(String tableName) {
-        return tableNameList.stream().anyMatch(c -> c.equalsIgnoreCase(tableName));
+    private TableInfo getTableInfoByName(String tableName) {
+        return tableInfoList.stream().filter(c -> c.getName().equalsIgnoreCase(tableName)).findFirst().orElse(null);
     }
 
     private SQLExpr appendWhereExpr(SQLExpr whereExpr, String appendWhere) {
@@ -124,7 +134,7 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
         if (whereExpr == null) {
             result = appendWhereExpr;
         } else {
-            if (!existsWhereExpr(whereExpr, ((SQLBinaryOpExpr) appendWhereExpr).getLeft())) {
+            if (!existsFieldInWhere(whereExpr, ((SQLBinaryOpExpr) appendWhereExpr).getLeft())) {
                 SQLBinaryOpExpr newWhereExpr = new SQLBinaryOpExpr(whereExpr, SQLBinaryOperator.BooleanAnd, appendWhereExpr);
                 result = newWhereExpr;
             } else {
@@ -137,19 +147,49 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
         return result;
     }
 
-    private boolean existsWhereExpr(SQLExpr whereExpr, SQLExpr appendFieldExpr) {
+    private boolean existsPrimaryKeyInWhere(SQLExpr whereExpr, String primaryKey, String alias) {
+        if (primaryKey == null) return false;
         if (!(whereExpr instanceof SQLBinaryOpExpr)) return false;
         SQLBinaryOpExpr whereBinaryOpExpr = (SQLBinaryOpExpr) whereExpr;
-        if (sameFieldExpr(whereBinaryOpExpr.getLeft(), appendFieldExpr)) {
+        if (isPrimaryKeyField(whereBinaryOpExpr.getLeft(), primaryKey, alias)) {
             return true;
         }
-        if (sameFieldExpr(whereBinaryOpExpr.getRight(), appendFieldExpr)) {
+        if (isPrimaryKeyField(whereBinaryOpExpr.getRight(), primaryKey, alias)) {
             return true;
         }
         return false;
     }
 
-    public boolean sameFieldExpr(SQLExpr fieldExpr, SQLExpr appendFieldExpr) {
+    private boolean isPrimaryKeyField(SQLExpr fieldExpr, String primaryKey, String alias) {
+        if (fieldExpr instanceof SQLPropertyExpr) {
+            SQLPropertyExpr fieldPropertyExpr = (SQLPropertyExpr) fieldExpr;
+            if (fieldPropertyExpr.getName().equalsIgnoreCase(primaryKey) && fieldPropertyExpr.getOwnernName().equalsIgnoreCase(alias)) {
+                return true;
+            }
+        } else if (fieldExpr instanceof SQLIdentifierExpr) {
+            SQLIdentifierExpr fieldIdentifierExpr = (SQLIdentifierExpr) fieldExpr;
+            if (fieldIdentifierExpr.getName().equalsIgnoreCase(primaryKey)) {
+                return true;
+            }
+        } else if (fieldExpr instanceof SQLBinaryOpExpr) {
+            return existsPrimaryKeyInWhere(fieldExpr, primaryKey, alias);
+        }
+        return false;
+    }
+
+    private boolean existsFieldInWhere(SQLExpr whereExpr, SQLExpr appendFieldExpr) {
+        if (!(whereExpr instanceof SQLBinaryOpExpr)) return false;
+        SQLBinaryOpExpr whereBinaryOpExpr = (SQLBinaryOpExpr) whereExpr;
+        if (sameField(whereBinaryOpExpr.getLeft(), appendFieldExpr)) {
+            return true;
+        }
+        if (sameField(whereBinaryOpExpr.getRight(), appendFieldExpr)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean sameField(SQLExpr fieldExpr, SQLExpr appendFieldExpr) {
         if (fieldExpr.getClass().getName().equals(appendFieldExpr.getClass().getName())) {
             if (appendFieldExpr instanceof SQLPropertyExpr) {
                 SQLPropertyExpr appendFieldPropertyExpr = (SQLPropertyExpr) appendFieldExpr;
@@ -165,13 +205,9 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
                 }
             }
         } else if (fieldExpr instanceof SQLBinaryOpExpr) {
-            return existsWhereExpr(fieldExpr, appendFieldExpr);
+            return existsFieldInWhere(fieldExpr, appendFieldExpr);
         }
         return false;
-    }
-
-    private String getAppendWhere() {
-        return getAppendWhere(null);
     }
 
     private String getAppendWhere(String alias) {
@@ -184,5 +220,31 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
 
     public boolean hasModify() {
         return this.hasModify;
+    }
+
+    public static class TableInfo {
+        private String name;
+        private String primaryKey;
+
+        public TableInfo(String name, String primaryKey) {
+            this.name = name;
+            this.primaryKey = primaryKey;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getPrimaryKey() {
+            return primaryKey;
+        }
+
+        public void setPrimaryKey(String primaryKey) {
+            this.primaryKey = primaryKey;
+        }
     }
 }
