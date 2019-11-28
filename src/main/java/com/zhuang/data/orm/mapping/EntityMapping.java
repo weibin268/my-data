@@ -76,16 +76,16 @@ public class EntityMapping {
 
     private void init() throws SQLException {
         DatabaseMetaData databaseMetaData = connection.getMetaData();
-        ResultSet rsTables = databaseMetaData.getTables(null, null, tableName, null);
+        ResultSet rsTables = databaseMetaData.getTables(databaseMetaData.getConnection().getCatalog(), null, tableName, null);
         while (rsTables.next()) {
             tableComment = rsTables.getString("REMARKS");
         }
-        ResultSet rsPrimaryKeys = databaseMetaData.getPrimaryKeys(null, null, tableName);
+        ResultSet rsPrimaryKeys = databaseMetaData.getPrimaryKeys(databaseMetaData.getConnection().getCatalog(), null, tableName);
         List<String> primaryKeys = new ArrayList<>();
         while (rsPrimaryKeys.next()) {
             primaryKeys.add(rsPrimaryKeys.getString("COLUMN_NAME"));
         }
-        ResultSet rsColumns = databaseMetaData.getColumns(null, null, tableName, null);
+        ResultSet rsColumns = databaseMetaData.getColumns(databaseMetaData.getConnection().getCatalog(), null, tableName, null);
         while (rsColumns.next()) {
             String columnName = rsColumns.getString("COLUMN_NAME");
             PropertyMapping propertyMapping = new PropertyMapping();
@@ -109,7 +109,7 @@ public class EntityMapping {
         List<EntityMapping> result = new ArrayList<>();
         try {
             DatabaseMetaData databaseMetaData = connection.getMetaData();
-            ResultSet rsTables = databaseMetaData.getTables(null, null, null, null);
+            ResultSet rsTables = databaseMetaData.getTables(databaseMetaData.getConnection().getCatalog(), null, null, null);
             while (rsTables.next()) {
                 String tableName = rsTables.getString("TABLE_NAME");
                 result.add(new EntityMapping(tableName, connection));
