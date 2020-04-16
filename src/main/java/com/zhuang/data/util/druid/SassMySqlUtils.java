@@ -11,9 +11,12 @@ import java.util.function.Supplier;
 public class SassMySqlUtils {
 
     public static String parseSql(String sql, List<SassModifyMySqlVisitor.TableInfo> tableInfoList, String fieldName, Supplier<String> valueSupplier) {
+        return parseSql(sql, new SassModifyMySqlVisitor(tableInfoList, fieldName, valueSupplier));
+    }
+
+    public static String parseSql(String sql,SassModifyMySqlVisitor sassModifyMySqlVisitor) {
         SQLStatementParser sqlStatementParser = SQLParserUtils.createSQLStatementParser(sql, JdbcConstants.MYSQL);
         List<SQLStatement> sqlStatementList = sqlStatementParser.parseStatementList();
-        SassModifyMySqlVisitor sassModifyMySqlVisitor = new SassModifyMySqlVisitor(tableInfoList, fieldName, valueSupplier);
         sqlStatementList.forEach(c -> c.accept(sassModifyMySqlVisitor));
         if (sassModifyMySqlVisitor.hasModify()) {
             StringBuilder sbSql = new StringBuilder();
