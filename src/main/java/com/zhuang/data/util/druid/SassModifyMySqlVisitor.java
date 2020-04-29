@@ -27,6 +27,9 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
 
 
     public SassModifyMySqlVisitor(List<TableInfo> tableInfoList, String fieldName, Supplier<String> valueSupplier) {
+        if (valueSupplier.get() == null) {
+            throw new RuntimeException("valueSupplier.get()返回不能为null！");
+        }
         this.tableInfoList = tableInfoList;
         this.fieldName = fieldName;
         this.valueSupplier = valueSupplier;
