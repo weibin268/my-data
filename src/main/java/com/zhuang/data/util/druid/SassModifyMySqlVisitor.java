@@ -27,6 +27,9 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
 
 
     public SassModifyMySqlVisitor(List<TableInfo> tableInfoList, String fieldName, Supplier<String> valueSupplier) {
+        if (valueSupplier.get() == null) {
+            throw new RuntimeException("valueSupplier.get()返回不能为null！");
+        }
         this.tableInfoList = tableInfoList;
         this.fieldName = fieldName;
         this.valueSupplier = valueSupplier;
@@ -96,6 +99,13 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
                     String alias = rightExprTableSource.getAlias() == null ? rightExprTableSource.getName().getSimpleName() : rightExprTableSource.getAlias();
                     modify4HasWhere(target, tableInfo, alias);
                 }
+            }
+            //两个以上的表连接
+            if(leftTableSource instanceof SQLJoinTableSource){
+                visit4HasWhere(target,leftTableSource);
+            }
+            if(rightTableSource instanceof SQLJoinTableSource){
+                visit4HasWhere(target,rightTableSource);
             }
         }
     }
