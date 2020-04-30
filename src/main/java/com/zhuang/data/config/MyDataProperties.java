@@ -47,7 +47,7 @@ public class MyDataProperties {
         try {
             inputStream = this.getClass().getClassLoader().getResourceAsStream(configFilePath);
             properties.load(inputStream);
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.debug("未加载到“my-data.properties”配置文件！", e);
         } finally {
             if (inputStream != null) {
