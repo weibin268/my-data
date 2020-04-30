@@ -1,5 +1,9 @@
 package com.zhuang.data.util;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Date;
 
 public class DataTypeUtils {
@@ -17,27 +21,40 @@ public class DataTypeUtils {
     }
 
     public static Class<?> getJavaTypeFromDbType(String dbType) {
-        if (dbType.equalsIgnoreCase("varchar") || dbType.equalsIgnoreCase("char")
-                || dbType.equalsIgnoreCase("text") || dbType.equalsIgnoreCase("tinytext")) {
+        if (isInDbTypes(dbType, "char", "varchar", "tinytext", "text", "longtext")) {
             return String.class;
-        } else if (dbType.equalsIgnoreCase("datetime") || dbType.equalsIgnoreCase("date")) {
+        } else if (isInDbTypes(dbType, "datetime", "date", "year")) {
             return Date.class;
-        } else if (dbType.equalsIgnoreCase("bigint")) {
-            return Long.class;
-        } else if (dbType.equalsIgnoreCase("int") || dbType.equalsIgnoreCase("integer")) {
+        } else if (isInDbTypes(dbType, "time")) {
+            return Time.class;
+        } else if (isInDbTypes(dbType, "timestamp")) {
+            return Timestamp.class;
+        } else if (isInDbTypes(dbType, "bigint")) {
+            return BigInteger.class;
+        } else if (isInDbTypes(dbType, "int", "integer", "mediumint")) {
             return Integer.class;
-        } else if (dbType.equalsIgnoreCase("tinyint") || dbType.equalsIgnoreCase("smallint")
-                || dbType.equalsIgnoreCase("mediumint")) {
+        } else if (isInDbTypes(dbType, "tinyint", "smallint")) {
             return Short.class;
-        } else if (dbType.equalsIgnoreCase("decimal") || dbType.equalsIgnoreCase("double")
-                || dbType.equalsIgnoreCase("numeric")) {
+        } else if (isInDbTypes(dbType, "double")) {
             return Double.class;
-        } else if (dbType.equalsIgnoreCase("float")) {
+        } else if (isInDbTypes(dbType, "decimal", "numeric")) {
+            return BigDecimal.class;
+        } else if (isInDbTypes(dbType, "float")) {
             return Float.class;
-        } else if (dbType.equalsIgnoreCase("bit")) {
+        } else if (isInDbTypes(dbType, "bit")) {
             return Boolean.class;
+        } else if (isInDbTypes(dbType, "blob")) {
+            return byte[].class;
         } else {
             return Object.class;
         }
     }
+
+    private static boolean isInDbTypes(String dbType, String... dbTypes) {
+        for (String type : dbTypes) {
+            if (dbType.equalsIgnoreCase(type)) return true;
+        }
+        return false;
+    }
+
 }
