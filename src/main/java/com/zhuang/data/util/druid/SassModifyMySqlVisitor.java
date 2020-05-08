@@ -159,13 +159,19 @@ public class SassModifyMySqlVisitor extends MySqlASTVisitorAdapter {
 
     private boolean existsPrimaryKeyInWhere(SQLExpr whereExpr, String primaryKey, String alias) {
         if (primaryKey == null) return false;
-        if (!(whereExpr instanceof SQLBinaryOpExpr)) return false;
-        SQLBinaryOpExpr whereBinaryOpExpr = (SQLBinaryOpExpr) whereExpr;
-        if (isPrimaryKeyField(whereBinaryOpExpr.getLeft(), primaryKey, alias)) {
-            return true;
-        }
-        if (isPrimaryKeyField(whereBinaryOpExpr.getRight(), primaryKey, alias)) {
-            return true;
+        if(whereExpr instanceof SQLInListExpr){
+            SQLInListExpr sqlInListExpr = (SQLInListExpr) whereExpr;
+            if (isPrimaryKeyField(sqlInListExpr.getExpr(), primaryKey, alias)) {
+                return true;
+            }
+        } else if (whereExpr instanceof SQLBinaryOpExpr) {
+            SQLBinaryOpExpr whereBinaryOpExpr = (SQLBinaryOpExpr) whereExpr;
+            if (isPrimaryKeyField(whereBinaryOpExpr.getLeft(), primaryKey, alias)) {
+                return true;
+            }
+            if (isPrimaryKeyField(whereBinaryOpExpr.getRight(), primaryKey, alias)) {
+                return true;
+            }
         }
         return false;
     }
