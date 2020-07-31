@@ -212,6 +212,10 @@ public class SassModifyBaseVisitor {
         return this.hasModify;
     }
 
+    public String getDbType() {
+        return dbType;
+    }
+
     public static class TableInfo {
         private String name;
         private String primaryKey;

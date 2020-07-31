@@ -15,7 +15,7 @@ public class SassSQLServerUtils {
     }
 
     public static String parseSql(String sql, SassModifySQLServerVisitor sassModifySQLServerVisitor) {
-        SQLStatementParser sqlStatementParser = SQLParserUtils.createSQLStatementParser(sql, JdbcConstants.SQL_SERVER);
+        SQLStatementParser sqlStatementParser = SQLParserUtils.createSQLStatementParser(sql, sassModifySQLServerVisitor.getBaseVisitor().getDbType());
         List<SQLStatement> sqlStatementList = sqlStatementParser.parseStatementList();
         sqlStatementList.forEach(c -> c.accept(sassModifySQLServerVisitor));
         if (sassModifySQLServerVisitor.getBaseVisitor().hasModify()) {

@@ -10,15 +10,15 @@ import java.util.function.Supplier;
 
 public class SassMySqlUtils {
 
-    public static String parseSql(String sql, List<SassModifyMySqlVisitor.TableInfo> tableInfoList, String fieldName, Supplier<String> valueSupplier) {
+    public static String parseSql(String sql, List<SassModifyBaseVisitor.TableInfo> tableInfoList, String fieldName, Supplier<String> valueSupplier) {
         return parseSql(sql, new SassModifyMySqlVisitor(tableInfoList, fieldName, valueSupplier));
     }
 
     public static String parseSql(String sql,SassModifyMySqlVisitor sassModifyMySqlVisitor) {
-        SQLStatementParser sqlStatementParser = SQLParserUtils.createSQLStatementParser(sql, JdbcConstants.MYSQL);
+        SQLStatementParser sqlStatementParser = SQLParserUtils.createSQLStatementParser(sql, sassModifyMySqlVisitor.getBaseVisitor().getDbType());
         List<SQLStatement> sqlStatementList = sqlStatementParser.parseStatementList();
         sqlStatementList.forEach(c -> c.accept(sassModifyMySqlVisitor));
-        if (sassModifyMySqlVisitor.hasModify()) {
+        if (sassModifyMySqlVisitor.getBaseVisitor().hasModify()) {
             StringBuilder sbSql = new StringBuilder();
             sqlStatementList.forEach(c -> sbSql.append('\n').append(c.toString()));
             return sbSql.toString();
