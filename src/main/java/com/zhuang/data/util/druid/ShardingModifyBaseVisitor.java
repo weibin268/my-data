@@ -1,12 +1,7 @@
 package com.zhuang.data.util.druid;
 
-import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLName;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
-import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 
@@ -25,12 +20,12 @@ public class ShardingModifyBaseVisitor {
         this.dbType = dbType;
     }
 
-    public void visit4HasWhere(Object target, SQLTableSource tableSource) {
+    public void visit(Object target, SQLTableSource tableSource) {
         if (tableSource instanceof SQLExprTableSource) {
             SQLExprTableSource exprTableSource = (SQLExprTableSource) tableSource;
             ShardingModifyBaseVisitor.TableInfo tableInfo = getTableInfoByName(exprTableSource.getName());
             if (tableInfo != null) {
-                modify4HasWhere(target, tableInfo, exprTableSource);
+                modify(tableInfo, exprTableSource);
             }
         } else if (tableSource instanceof SQLJoinTableSource) {
             SQLJoinTableSource joinTableSource = (SQLJoinTableSource) tableSource;
@@ -40,38 +35,29 @@ public class ShardingModifyBaseVisitor {
                 SQLExprTableSource leftExprTableSource = (SQLExprTableSource) leftTableSource;
                 ShardingModifyBaseVisitor.TableInfo tableInfo = getTableInfoByName(leftExprTableSource.getName());
                 if (tableInfo != null) {
-                    modify4HasWhere(target, tableInfo, leftExprTableSource);
+                    modify(tableInfo, leftExprTableSource);
                 }
             }
             if (rightTableSource instanceof SQLExprTableSource) {
                 SQLExprTableSource rightExprTableSource = (SQLExprTableSource) rightTableSource;
                 ShardingModifyBaseVisitor.TableInfo tableInfo = getTableInfoByName(rightExprTableSource.getName());
                 if (tableInfo != null) {
-                    modify4HasWhere(target, tableInfo, rightExprTableSource);
+                    modify(tableInfo, rightExprTableSource);
                 }
             }
             //两个以上的表连接
             if (leftTableSource instanceof SQLJoinTableSource) {
-                visit4HasWhere(target, leftTableSource);
+                visit(target, leftTableSource);
             }
             if (rightTableSource instanceof SQLJoinTableSource) {
-                visit4HasWhere(target, rightTableSource);
+                visit(target, rightTableSource);
             }
         }
     }
 
-    private void modify4HasWhere(Object target, ShardingModifyBaseVisitor.TableInfo tableInfo, SQLExprTableSource exprTableSource) {
+    private void modify(ShardingModifyBaseVisitor.TableInfo tableInfo, SQLExprTableSource exprTableSource) {
         exprTableSource.setExpr(tableInfo.getName() + tableInfo.getShardingName());
         hasModify = true;
-    }
-
-    public boolean visit4Insert(SQLInsertStatement x) {
-        SQLExprTableSource tableSource = x.getTableSource();
-        TableInfo tableInfo = getTableInfoByName(tableSource.getName());
-        if (tableInfo == null) return true;
-        tableSource.setExpr(tableInfo.getName() + tableInfo.getShardingName());
-        hasModify = true;
-        return true;
     }
 
     private ShardingModifyBaseVisitor.TableInfo getTableInfoByName(SQLName tableName) {

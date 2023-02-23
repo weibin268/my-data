@@ -8,7 +8,6 @@ import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerASTVisitorAdapte
 import com.alibaba.druid.util.JdbcConstants;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 public class ShardingModifySQLServerVisitor extends SQLServerASTVisitorAdapter {
 
@@ -24,25 +23,26 @@ public class ShardingModifySQLServerVisitor extends SQLServerASTVisitorAdapter {
 
     @Override
     public boolean visit(SQLServerSelectQueryBlock x) {
-        baseVisitor.visit4HasWhere(x, x.getFrom());
+        baseVisitor.visit(x, x.getFrom());
         return true;
     }
 
     @Override
     public boolean visit(SQLServerUpdateStatement x) {
-        baseVisitor.visit4HasWhere(x, x.getTableSource());
+        baseVisitor.visit(x, x.getTableSource());
         return true;
     }
 
     @Override
     public boolean visit(SQLDeleteStatement x) {
-        baseVisitor.visit4HasWhere(x, x.getTableSource());
+        baseVisitor.visit(x, x.getTableSource());
         return true;
     }
 
     @Override
     public boolean visit(SQLServerInsertStatement x) {
-        return baseVisitor.visit4Insert(x);
+        baseVisitor.visit(x, x.getTableSource());
+        return true;
     }
 
 
