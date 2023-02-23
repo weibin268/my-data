@@ -4,6 +4,7 @@ import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
+import com.zhuang.data.util.StringUtils;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class ShardingModifyBaseVisitor {
             SQLExprTableSource exprTableSource = (SQLExprTableSource) tableSource;
             ShardingModifyBaseVisitor.TableInfo tableInfo = getTableInfoByName(exprTableSource.getName());
             if (tableInfo != null) {
-                modify(tableInfo, exprTableSource);
+                modify(exprTableSource, tableInfo);
             }
         } else if (tableSource instanceof SQLJoinTableSource) {
             SQLJoinTableSource joinTableSource = (SQLJoinTableSource) tableSource;
@@ -35,14 +36,14 @@ public class ShardingModifyBaseVisitor {
                 SQLExprTableSource leftExprTableSource = (SQLExprTableSource) leftTableSource;
                 ShardingModifyBaseVisitor.TableInfo tableInfo = getTableInfoByName(leftExprTableSource.getName());
                 if (tableInfo != null) {
-                    modify(tableInfo, leftExprTableSource);
+                    modify(leftExprTableSource, tableInfo);
                 }
             }
             if (rightTableSource instanceof SQLExprTableSource) {
                 SQLExprTableSource rightExprTableSource = (SQLExprTableSource) rightTableSource;
                 ShardingModifyBaseVisitor.TableInfo tableInfo = getTableInfoByName(rightExprTableSource.getName());
                 if (tableInfo != null) {
-                    modify(tableInfo, rightExprTableSource);
+                    modify(rightExprTableSource, tableInfo);
                 }
             }
             //两个以上的表连接
@@ -55,8 +56,9 @@ public class ShardingModifyBaseVisitor {
         }
     }
 
-    private void modify(ShardingModifyBaseVisitor.TableInfo tableInfo, SQLExprTableSource exprTableSource) {
-        exprTableSource.setExpr(tableInfo.getName() + tableInfo.getShardingName());
+    private void modify(SQLExprTableSource exprTableSource, ShardingModifyBaseVisitor.TableInfo tableInfo) {
+        if (tableInfo.getShardingName() == null) return;
+        exprTableSource.setExpr(tableInfo.getName() + tableInfo.getDelimiter() + tableInfo.getShardingName());
         hasModify = true;
     }
 
@@ -78,11 +80,15 @@ public class ShardingModifyBaseVisitor {
 
     public static class TableInfo {
         private String name;
-        private String shardingName;
+        private String delimiter;
 
-        public TableInfo(String name, String shardingName) {
+        public TableInfo(String name) {
+            this(name, "_");
+        }
+
+        public TableInfo(String name, String delimiter) {
             this.name = name;
-            this.shardingName = shardingName;
+            this.delimiter = delimiter;
         }
 
         public String getName() {
@@ -94,11 +100,15 @@ public class ShardingModifyBaseVisitor {
         }
 
         public String getShardingName() {
-            return shardingName;
+            return ShardingNameHolder.getShardingName(name);
         }
 
-        public void setShardingName(String shardingName) {
-            this.shardingName = shardingName;
+        public String getDelimiter() {
+            return delimiter;
+        }
+
+        public void setDelimiter(String delimiter) {
+            this.delimiter = delimiter;
         }
     }
 }
