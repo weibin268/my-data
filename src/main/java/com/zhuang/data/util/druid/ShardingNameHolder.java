@@ -13,7 +13,6 @@ public class ShardingNameHolder {
         return map.get(tableName);
     }
 
-
     public static void setShardingName(String tableName, String shardingName) {
         Map<String, String> map = shardingNameMap.get();
         if (map == null) {
@@ -21,6 +20,13 @@ public class ShardingNameHolder {
             shardingNameMap.set(map);
         }
         map.put(tableName, shardingName);
+    }
+
+    public static void removeShardingName(String tableName) {
+        Map<String, String> map = shardingNameMap.get();
+        if (map != null && map.containsKey(tableName)) {
+            map.remove(tableName);
+        }
     }
 
 }
